@@ -9,7 +9,7 @@ import trackbug.util.ConnectionFactory;
 
 import java.time.LocalDate;
 
-public class CadastrarFuncionarioController {
+public class CadastrarClienteController {
     @FXML
     private TextField idField;
     @FXML
@@ -23,7 +23,7 @@ public class CadastrarFuncionarioController {
 
     private final FuncionarioService funcionarioService;
 
-    public CadastrarFuncionarioController() {
+    public CadastrarClienteController() {
         this.funcionarioService = new FuncionarioService();
     }
 

@@ -19,7 +19,7 @@ public class ConnectionFactory {
             props.setProperty("db.url", "jdbc:mysql://localhost:3306/trackbug");
             props.setProperty("db.user", "root");
             props.setProperty("db.password", "root");
-            props.setProperty("db.name", "trackbug");
+            props.setProperty("db.name", "RFFlux");
             props.setProperty("db.backup.path", "backup/");
         }
     }

@@ -14,38 +14,37 @@ import javafx.collections.transformation.FilteredList;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import trackbug.Main;
-import trackbug.model.entity.Equipamento;
-import trackbug.model.service.EquipamentoService;
+import trackbug.model.entity.Item;
+import trackbug.model.service.ItemService;
 import trackbug.util.AlertHelper;
 import trackbug.util.ConnectionFactory;
-import trackbug.util.DateUtils;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class ListarEquipamentosController implements Initializable {
+public class ListarItensController implements Initializable {
 
     @FXML private TextField campoBusca;
     @FXML private ComboBox<String> filtroTipo;
     @FXML private ComboBox<String> filtroStatus;
-    @FXML private TableView<Equipamento> tabelaEquipamentos;
-    @FXML private TableColumn<Equipamento, String> colunaId;
-    @FXML private TableColumn<Equipamento, String> colunaDescricao;
-    @FXML private TableColumn<Equipamento, Integer> colunaQuantidadeAtual;
-    @FXML private TableColumn<Equipamento, Integer> colunaQuantidadeEstoque;
-    @FXML private TableColumn<Equipamento, Integer> colunaQuantidadeMinima;
-    @FXML private TableColumn<Equipamento, String> colunaTipo;
-    @FXML private TableColumn<Equipamento, String> colunaStatus;
-    @FXML private TableColumn<Equipamento, Void> colunaAcoes;
+    @FXML private TableView<Item> tabelaEquipamentos;
+    @FXML private TableColumn<Item, String> colunaId;
+    @FXML private TableColumn<Item, String> colunaDescricao;
+    @FXML private TableColumn<Item, Integer> colunaQuantidadeAtual;
+    @FXML private TableColumn<Item, Integer> colunaQuantidadeEstoque;
+    @FXML private TableColumn<Item, Integer> colunaQuantidadeMinima;
+    @FXML private TableColumn<Item, String> colunaTipo;
+    @FXML private TableColumn<Item, String> colunaStatus;
+    @FXML private TableColumn<Item, Void> colunaAcoes;
     @FXML private Label statusLabel;
 
-    private final EquipamentoService equipamentoService;
-    private ObservableList<Equipamento> equipamentos;
+    private final ItemService itemService;
+    private ObservableList<Item> items;
 
-    public ListarEquipamentosController() {
-        this.equipamentoService = new EquipamentoService();
+    public ListarItensController() {
+        this.itemService = new ItemService();
     }
 
     @Override
@@ -98,13 +97,9 @@ public class ListarEquipamentosController implements Initializable {
                         data.getValue().getQuantidadeMinima()
                 ).asObject());
 
-        colunaTipo.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(
-                        data.getValue().isTipo() ? "Consumível" : "Emprestável"
-                ));
 
         colunaStatus.setCellValueFactory(data -> {
-            Equipamento eq = data.getValue();
+            Item eq = data.getValue();
             String status;
             if (eq.getQuantidadeAtual() < eq.getQuantidadeMinima()) {
                 status = "Estoque baixo";
@@ -128,9 +123,7 @@ public class ListarEquipamentosController implements Initializable {
                 btnDeletar.getStyleClass().add("btn-delete");
                 btnAvaria.getStyleClass().add("btn-avaria");
 
-                btnEditar.setOnAction(e -> editarEquipamento(getTableRow().getItem()));
                 btnDeletar.setOnAction(e -> deletarEquipamento(getTableRow().getItem()));
-                btnAvaria.setOnAction(e -> registrarAvaria(getTableRow().getItem()));
 
                 box.getChildren().addAll(btnEditar, btnDeletar, btnAvaria);
             }
@@ -143,7 +136,7 @@ public class ListarEquipamentosController implements Initializable {
         });
 
         // Estilizar coluna de status
-        colunaStatus.setCellFactory(column -> new TableCell<Equipamento, String>() {
+        colunaStatus.setCellFactory(column -> new TableCell<Item, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -176,9 +169,9 @@ public class ListarEquipamentosController implements Initializable {
     }
 
     private void aplicarFiltros() {
-        if (equipamentos == null) return;
+        if (items == null) return;
 
-        FilteredList<Equipamento> dadosFiltrados = new FilteredList<>(equipamentos);
+        FilteredList<Item> dadosFiltrados = new FilteredList<>(items);
         String textoBusca = campoBusca.getText().toLowerCase();
         String tipoSelecionado = filtroTipo.getValue();
         String statusSelecionado = filtroStatus.getValue();
@@ -188,9 +181,6 @@ public class ListarEquipamentosController implements Initializable {
                     equipamento.getDescricao().toLowerCase().contains(textoBusca) ||
                     equipamento.getId().toLowerCase().contains(textoBusca);
 
-            boolean matchTipo = tipoSelecionado.equals("Todos") ||
-                    (tipoSelecionado.equals("Emprestáveis") && !equipamento.isTipo()) ||
-                    (tipoSelecionado.equals("Consumíveis") && equipamento.isTipo());
 
             String status;
             if (equipamento.getQuantidadeAtual() < equipamento.getQuantidadeMinima()) {
@@ -204,7 +194,7 @@ public class ListarEquipamentosController implements Initializable {
             boolean matchStatus = statusSelecionado.equals("Todos") ||
                     statusSelecionado.equals(status);
 
-            return matchBusca && matchTipo && matchStatus;
+            return matchBusca && matchStatus;
         });
         ConnectionFactory.importarBancoDeDados("BACKUP.2024");
         tabelaEquipamentos.setItems(dadosFiltrados);
@@ -214,56 +204,19 @@ public class ListarEquipamentosController implements Initializable {
 
     private void carregarEquipamentos() {
         try {
-            equipamentos = FXCollections.observableArrayList(
-                    equipamentoService.listarTodos()
+            items = FXCollections.observableArrayList(
+                    itemService.listarItens()
             );
-            tabelaEquipamentos.setItems(equipamentos);
+            tabelaEquipamentos.setItems(items);
             atualizarStatusLabel();
         } catch (Exception e) {
             AlertHelper.showError("Erro ao carregar equipamentos", e.getMessage());
         }
     }
 
-    private void editarEquipamento(Equipamento equipamento) {
+    private void deletarEquipamento(Item item) {
         try {
-            // Carregar a tela de edição
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/editar-equipamento.fxml"));
-            Parent root = loader.load();
 
-            // Obter o controller e passar o equipamento
-            EditarEquipamentoController controller = loader.getController();
-            controller.setEquipamento(equipamento);
-            Image icon = new Image(Main.class.getResourceAsStream("/images/icon.png"));
-
-            // Criar e configurar o Stage
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Editar Equipamento");
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
-            dialogStage.setResizable(false);
-
-            // Criar a cena
-            Scene scene = new Scene(root);
-            dialogStage.setScene(scene);
-            dialogStage.getIcons().add(icon);
-
-            // Configurar ação ao fechar (atualizar a lista)
-            dialogStage.setOnHiding(event -> carregarEquipamentos());
-
-            // Mostrar a tela
-            dialogStage.showAndWait();
-
-        } catch (IOException e) {
-            AlertHelper.showError("Erro", "Erro ao abrir formulário de edição: " + e.getMessage());
-        }
-    }
-
-    private void deletarEquipamento(Equipamento equipamento) {
-        try {
-            if (equipamentoService.possuiEmprestimosAtivos(equipamento.getId())) {
-                AlertHelper.showWarning("Não é possível excluir",
-                        "Este equipamento possui empréstimos ativos.");
-                return;
-            }
 
             Optional<ButtonType> result = AlertHelper.showConfirmation(
                     "Confirmar Exclusão",
@@ -272,44 +225,13 @@ public class ListarEquipamentosController implements Initializable {
             );
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                equipamentoService.deletar(equipamento.getId());
+                itemService.deletar(item.getId());
                 ConnectionFactory.exportarBancoDeDados("BACKUP.2024");
                 carregarEquipamentos();
                 AlertHelper.showSuccess("Equipamento excluído com sucesso!");
             }
         } catch (Exception e) {
             AlertHelper.showError("Erro ao excluir equipamento", e.getMessage());
-        }
-    }
-
-    private void registrarAvaria(Equipamento equipamento) {
-        try {
-            // Carregar a tela de edição
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/registrar-avaria.fxml"));
-            Parent root = loader.load();
-
-            // Obter o controller e passar o equipamento
-            RegistrarAvariaController controller = loader.getController();
-            controller.setEquipamento(equipamento);
-
-            // Criar e configurar o Stage
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Registrar Equipamento");
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
-            dialogStage.setResizable(false);
-
-            // Criar a cena
-            Scene scene = new Scene(root);
-            dialogStage.setScene(scene);
-
-            // Configurar ação ao fechar (atualizar a lista)
-            dialogStage.setOnHiding(event -> carregarEquipamentos());
-
-            // Mostrar a tela
-            dialogStage.showAndWait();
-
-        } catch (IOException e) {
-            AlertHelper.showError("Erro", "Erro ao abrir formulário de registro de avaria: " + e.getMessage());
         }
     }
 

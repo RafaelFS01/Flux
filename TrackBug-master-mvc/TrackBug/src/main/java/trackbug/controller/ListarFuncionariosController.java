@@ -15,7 +15,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import trackbug.model.entity.Funcionario;
 import trackbug.model.service.FuncionarioService;
-import trackbug.model.service.EmprestimoService;
 import trackbug.util.AlertHelper;
 import trackbug.util.ConnectionFactory;
 import trackbug.util.DateUtils;
@@ -38,12 +37,10 @@ public class ListarFuncionariosController implements Initializable {
     @FXML private Label statusLabel;
 
     private final FuncionarioService funcionarioService;
-    private final EmprestimoService emprestimoService;
     private ObservableList<Funcionario> funcionarios;
 
     public ListarFuncionariosController() {
         this.funcionarioService = new FuncionarioService();
-        this.emprestimoService = new EmprestimoService();
     }
 
     @Override
@@ -171,12 +168,6 @@ public class ListarFuncionariosController implements Initializable {
     private void deletarFuncionario(Funcionario funcionario) {
         if (funcionario != null) {
             try {
-                if (emprestimoService.possuiEmprestimosAtivos(funcionario.getId())) {
-                    AlertHelper.showWarning("Não é possível excluir",
-                            "Este funcionário possui empréstimos ativos. " +
-                                    "Finalize todos os empréstimos antes de excluí-lo.");
-                    return;
-                }
 
                 Optional<ButtonType> result = AlertHelper.showConfirmation(
                         "Confirmar Exclusão",

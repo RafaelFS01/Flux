@@ -4,19 +4,19 @@
 <?import javafx.scene.layout.*?>
 <VBox spacing="30" styleClass="form-container" xmlns="http://javafx.com/javafx/19"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="trackbug.controller.ListarEquipamentosController"
+      fx:controller="trackbug.controller.ListarItensController"
       VBox.vgrow="ALWAYS">
 
     <!-- Cabeçalho -->
     <VBox styleClass="form-header" alignment="CENTER">
         <Label text="Equipamentos Cadastrados" styleClass="form-title"/>
-        <Label text="Visualize e gerencie os equipamentos do sistema" styleClass="form-subtitle"/>
+        <Label text="Visualize e gerencie os items do sistema" styleClass="form-subtitle"/>
     </VBox>
 
     <!-- Barra de Ferramentas -->
     <HBox spacing="15" styleClass="toolbar-container" alignment="CENTER_LEFT">
         <!-- Campo de Busca -->
-        <TextField fx:id="campoBusca" promptText="Buscar equipamento..." styleClass="search-field"/>
+        <TextField fx:id="campoBusca" promptText="Buscar item..." styleClass="search-field"/>
 
         <!-- Filtros -->
         <ComboBox fx:id="filtroTipo" promptText="Tipo" styleClass="form-combo"/>
@@ -43,7 +43,7 @@
             <TableColumn fx:id="colunaAcoes" text="Ações" minWidth="220" maxWidth="300"/>
         </columns>
         <placeholder>
-            <Label text="Nenhum equipamento encontrado." style="-fx-font-size: 26;"/>
+            <Label text="Nenhum item encontrado." style="-fx-font-size: 26;"/>
         </placeholder>
     </TableView>
 

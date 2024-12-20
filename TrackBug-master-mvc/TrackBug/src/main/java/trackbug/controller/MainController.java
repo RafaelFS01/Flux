@@ -2,7 +2,6 @@ package trackbug.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -48,28 +47,8 @@ public class MainController {
     }
 
     @FXML
-    private void mostrarEmprestimos() {
-        carregarFXML("/fxml/emprestimo.fxml");
-    }
-
-    @FXML
-    private void mostrarDevolucao() {
-        carregarFXML("/fxml/devolucao.fxml");
-    }
-
-    @FXML
-    private void mostrarEmprestimosAtivos() {
-        carregarFXML("/fxml/emprestimos-ativos.fxml");
-    }
-
-    @FXML
-    private void mostrarEmprestimosAtraso() {
-        carregarFXML("/fxml/emprestimos-atraso.fxml");
-    }
-
-    @FXML
     private void mostrarRegistroEquipamento() {
-        carregarFXML("/fxml/registrar-equipamento.fxml");
+        carregarFXML("/fxml/CadastroItem.fxml");
     }
 
     @FXML
@@ -88,23 +67,8 @@ public class MainController {
     }
 
     @FXML
-    private void mostrarHistorico() {
-        carregarFXML("/fxml/historico-emprestimos.fxml");
-    }
-
-    @FXML
     private void mostrarGerenciamentoUsuarios() {
         carregarFXML("/fxml/gerenciar-permissoes.fxml");
-    }
-
-    @FXML
-    private void mostrarHistoricoAvarias() {
-        carregarFXML("/fxml/historico-avarias.fxml");
-    }
-
-    @FXML
-    private void mostrarHistoricoAlteracoes() {
-        carregarFXML("/fxml/historico-alteracoes.fxml");
     }
 
     @FXML

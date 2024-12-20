@@ -6,7 +6,7 @@
 
 <VBox alignment="TOP_CENTER" styleClass="form-container"
       xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="trackbug.controller.CadastrarFuncionarioController">
+      fx:controller="trackbug.controller.CadastrarClienteController">
 
     <!-- Cabeçalho -->
     <VBox alignment="CENTER" spacing="5">

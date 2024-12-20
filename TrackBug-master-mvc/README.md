@@ -1,24 +1,38 @@
-TABELAS DO MYSQL
+-- TABELAS DO MYSQL
 
 -- Criar e selecionar o banco de dados
 CREATE DATABASE trackbug;
 USE trackbug;
 
 -- Tabelas principais
-CREATE TABLE equipamentos (
-    id VARCHAR(200) PRIMARY KEY,
-    descricao VARCHAR(200),
-    dataCompra DATE,
-    peso DOUBLE NULL COMMENT 'Peso do equipamento (opcional)',
-    largura DOUBLE NULL COMMENT 'Largura do equipamento (opcional)',
-    comprimento DOUBLE NULL COMMENT 'Comprimento do equipamento (opcional)',
-    tipo BOOLEAN,
-    quantidadeAtual INT,
-    quantidadeEstoque INT,
-    quantidadeMinima INT,
-    status VARCHAR(50) DEFAULT 'Disponível',
-    tipo_uso VARCHAR(20) NOT NULL DEFAULT 'Reutilizável',
-    usoUnico BOOLEAN DEFAULT FALSE
+create database RFFlux;
+use RFFlux;
+
+-- Tabela de Categorias
+CREATE TABLE categorias (
+id INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(255) NOT NULL UNIQUE,
+descricao TEXT,
+tipo ENUM('Geral', 'Embalagem', 'Etiqueta') NOT NULL
+);
+
+-- Tabela de Itens
+CREATE TABLE itens (
+id INT PRIMARY KEY,
+nome VARCHAR(255) NOT NULL UNIQUE,
+descricao TEXT,
+preco_venda DECIMAL(10, 2) NOT NULL,
+preco_custo DECIMAL(10, 2) NOT NULL,
+unidade_medida VARCHAR(50) NOT NULL,
+quantidade_estoque INT NOT NULL,
+quantidade_minima INT NOT NULL,
+quantidade_atual INT NOT NULL DEFAULT 0,
+categoria_id INT,
+embalagem_id INT,
+etiqueta_id INT,
+FOREIGN KEY (categoria_id) REFERENCES categorias(id),
+FOREIGN KEY (embalagem_id) REFERENCES categorias(id),
+FOREIGN KEY (etiqueta_id) REFERENCES categorias(id)
 );
 
 CREATE TABLE funcionarios (
@@ -27,26 +41,6 @@ CREATE TABLE funcionarios (
     funcao VARCHAR(200),
     dt DATE,
     cpf VARCHAR(11)
-);
-
-CREATE TABLE emprestimos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    idFuncionario VARCHAR(200),
-    idEquipamento VARCHAR(200),
-    observacoes VARCHAR(200),
-    dataSaida TIMESTAMP,
-    dataRetornoPrevista TIMESTAMP,
-    dataRetornoEfetiva TIMESTAMP,
-    ativo BOOLEAN,
-    quantidadeEmprestimo INT,
-    tipoOperacao ENUM('ENTRADA', 'SAIDA', 'RETORNO', 'MANUTENCAO', 'BAIXA') DEFAULT 'SAIDA',
-    usoUnico BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (idFuncionario) REFERENCES funcionarios(id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-    FOREIGN KEY (idEquipamento) REFERENCES equipamentos(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
 );
 
 CREATE TABLE usuarios (
@@ -66,31 +60,17 @@ CREATE TABLE avarias (
     quantidade INT NOT NULL,
     descricao TEXT,
     data DATETIME NOT NULL,
-    FOREIGN KEY (id_equipamento) REFERENCES equipamentos(id)
+    FOREIGN KEY (id_equipamento) REFERENCES items(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
-CREATE TABLE log_equipamentos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_equipamento VARCHAR(50),
-    descricao TEXT,
-    acao VARCHAR(50),
-    data_acao DATETIME NOT NULL,
-    detalhes TEXT,
-    FOREIGN KEY (id_equipamento) REFERENCES equipamentos(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
 
 -- Índices para otimização de performance
-CREATE INDEX idx_equipamentos_status ON equipamentos(status);
-CREATE INDEX idx_equipamentos_peso ON equipamentos(peso);
-CREATE INDEX idx_equipamentos_largura ON equipamentos(largura);
-CREATE INDEX idx_equipamentos_comprimento ON equipamentos(comprimento);
-CREATE INDEX idx_log_equipamentos_id_equip ON log_equipamentos(id_equipamento);
-CREATE INDEX idx_emprestimos_ativo ON emprestimos(ativo);
-CREATE INDEX idx_emprestimos_datas ON emprestimos(dataSaida, dataRetornoPrevista, dataRetornoEfetiva);
+CREATE INDEX idx_equipamentos_status ON itens(status);
+CREATE INDEX idx_equipamentos_peso ON itens(peso);
+CREATE INDEX idx_equipamentos_largura ON itens(largura);
+CREATE INDEX idx_equipamentos_comprimento ON itens(comprimento);
 CREATE INDEX idx_usuarios_username ON usuarios(username);
 CREATE INDEX idx_funcionarios_nome ON funcionarios(nome);
 
