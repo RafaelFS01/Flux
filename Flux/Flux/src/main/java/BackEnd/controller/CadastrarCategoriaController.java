@@ -13,7 +13,7 @@ import BackEnd.util.AlertHelper;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class CadastroCategoriaController implements Initializable {
+public class CadastrarCategoriaController implements Initializable {
 
     @FXML private TextField nomeField;
     @FXML private TextField descricaoField;

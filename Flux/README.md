@@ -34,7 +34,7 @@ FOREIGN KEY (embalagem_secundaria_id) REFERENCES categorias(id),
 FOREIGN KEY (etiqueta_id) REFERENCES categorias(id)
 );
 
-CREATE TABLE funcionarios (
+CREATE TABLE clientes (
     id VARCHAR(200) PRIMARY KEY,
     nome VARCHAR(200),
     funcao VARCHAR(200),
@@ -60,7 +60,7 @@ CREATE INDEX idx_equipamentos_peso ON itens(peso);
 CREATE INDEX idx_equipamentos_largura ON itens(largura);
 CREATE INDEX idx_equipamentos_comprimento ON itens(comprimento);
 CREATE INDEX idx_usuarios_username ON usuarios(username);
-CREATE INDEX idx_funcionarios_nome ON funcionarios(nome);
+CREATE INDEX idx_funcionarios_nome ON clientes(nome);
 
 -- Dados iniciais
 INSERT INTO usuarios (username, password, nome, email, nivel_acesso) 

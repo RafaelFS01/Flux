@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 
 <VBox spacing="20" styleClass="form-container" xmlns="http://javafx.com/javafx/19"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="BackEnd.controller.ListarFuncionariosController">
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="BackEnd.controller.ListarClientesController">
 
     <!-- Cabeçalho -->
     <VBox styleClass="form-header" alignment="CENTER">

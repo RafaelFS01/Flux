@@ -14,7 +14,7 @@ public class Main extends Application {
         // Carrega o ícone
         Image icon = new Image(getClass().getResourceAsStream("/images/icon.png"));
 
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
         Scene scene = new Scene(root, 1200, 600);
 
         // Carrega os estilosA
@@ -32,7 +32,7 @@ public class Main extends Application {
         try {
             ConnectionFactory.importarBancoDeDados("BACKUP.2024");
             Image icon = new Image(Main.class.getResourceAsStream("/images/icon.png"));
-            Parent root = FXMLLoader.load(Main.class.getResource("/fxml/main.fxml"));
+            Parent root = FXMLLoader.load(Main.class.getResource("/fxml/Main.fxml"));
             Scene scene = new Scene(root, 1200, 800);
 
             // Carrega os estilos

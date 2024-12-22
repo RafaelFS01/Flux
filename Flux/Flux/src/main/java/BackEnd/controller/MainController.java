@@ -54,22 +54,22 @@ public class MainController {
 
     @FXML
     private void mostrarListaEquipamentos() {
-        carregarFXML("/fxml/listar-equipamentos.fxml");
+        carregarFXML("/fxml/ListarEquipamentos.fxml");
     }
 
     @FXML
     private void mostrarCadastroFuncionario() {
-        carregarFXML("/fxml/cadastrar-funcionario.fxml");
+        carregarFXML("/fxml/CadastrarCliente.fxml");
     }
 
     @FXML
     private void mostrarListaFuncionarios() {
-        carregarFXML("/fxml/listar-funcionarios.fxml");
+        carregarFXML("/fxml/ListarClientes.fxml");
     }
 
     @FXML
     private void mostrarGerenciamentoUsuarios() {
-        carregarFXML("/fxml/gerenciar-permissoes.fxml");
+        carregarFXML("/fxml/GerenciarPermissoes.fxml");
     }
 
     @FXML

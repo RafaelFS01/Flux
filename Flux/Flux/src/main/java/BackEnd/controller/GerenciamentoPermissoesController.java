@@ -144,7 +144,7 @@ public class GerenciamentoPermissoesController implements Initializable {
             dialogStage.initModality(Modality.APPLICATION_MODAL);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/cadastrar-usuario.fxml")
+                    getClass().getResource("/fxml/CadastrarUsuario.fxml")
             );
 
             Scene scene = new Scene(loader.load());
@@ -175,7 +175,7 @@ public class GerenciamentoPermissoesController implements Initializable {
             dialogStage.initModality(Modality.APPLICATION_MODAL);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/cadastrar-usuario.fxml")
+                    getClass().getResource("/fxml/CadastrarUsuario.fxml")
             );
 
             Scene scene = new Scene(loader.load());

@@ -1,9 +1,5 @@
 package BackEnd.controller;
 
-import BackEnd.model.dao.interfaces.CategoriaDAO;
-import BackEnd.model.dao.interfaces.ItemDAO;
-import BackEnd.util.ConnectionFactory;
-import BackEnd.util.ValidationHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -29,7 +25,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class CadastroItemController implements Initializable {
+public class CadastrarItemController implements Initializable {
 
     @FXML private TextField idField;
     @FXML private TextField nomeField;
@@ -48,7 +44,7 @@ public class CadastroItemController implements Initializable {
     private final ItemService itemService;
     private final CategoriaService categoriaService;
 
-    public CadastroItemController() {
+    public CadastrarItemController() {
         this.itemService = new ItemService();
         this.categoriaService = new CategoriaService();
     }
@@ -216,7 +212,7 @@ public class CadastroItemController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CadastroCategoria.fxml"));
             Parent root = loader.load();
 
-            CadastroCategoriaController controller = loader.getController();
+            CadastrarCategoriaController controller = loader.getController();
             controller.setCategoriaService(categoriaService);
             controller.setTipoCategoria(tipo);
 

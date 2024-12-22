@@ -1,16 +1,16 @@
 package BackEnd.model.dao.impl;
 
-import BackEnd.model.dao.interfaces.FuncionarioDAO;
-import BackEnd.model.entity.Funcionario;
+import BackEnd.model.dao.interfaces.ClienteDAO;
+import BackEnd.model.entity.Cliente;
 import BackEnd.util.ConnectionFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FuncionarioDAOImpl implements FuncionarioDAO {
+public class ClienteDAOImpl implements ClienteDAO {
 
     @Override
-    public void criar(Funcionario funcionario) throws Exception {
+    public void criar(Cliente cliente) throws Exception {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -18,11 +18,11 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
             String sql = "INSERT INTO funcionarios (id, nome, funcao, dt, cpf) VALUES (?, ?, ?, ?, ?)";
 
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, funcionario.getId());
-            stmt.setString(2, funcionario.getNome());
-            stmt.setString(3, funcionario.getFuncao());
-            stmt.setDate(4, Date.valueOf(funcionario.getDataAdmissao()));
-            stmt.setString(5, funcionario.getCpf());
+            stmt.setString(1, cliente.getId());
+            stmt.setString(2, cliente.getNome());
+            stmt.setString(3, cliente.getFuncao());
+            stmt.setDate(4, Date.valueOf(cliente.getDataAdmissao()));
+            stmt.setString(5, cliente.getCpf());
 
             stmt.executeUpdate();
         } finally {
@@ -31,7 +31,7 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
     }
 
     @Override
-    public Funcionario buscarPorId(String id) throws Exception {
+    public Cliente buscarPorId(String id) throws Exception {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -51,7 +51,7 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
         }
     }
 
-    public Funcionario buscarPorCPF(String cpf) throws Exception {
+    public Cliente buscarPorCPF(String cpf) throws Exception {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -72,11 +72,11 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
     }
 
     @Override
-    public List<Funcionario> listarTodos() throws Exception {
+    public List<Cliente> listarTodos() throws Exception {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<Funcionario> funcionarios = new ArrayList<>();
+        List<Cliente> clientes = new ArrayList<>();
 
         try {
             conn = ConnectionFactory.getConnection();
@@ -85,17 +85,17 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                funcionarios.add(mapearResultSet(rs));
+                clientes.add(mapearResultSet(rs));
             }
 
-            return funcionarios;
+            return clientes;
         } finally {
             ConnectionFactory.closeConnection(conn, stmt, rs);
         }
     }
 
     @Override
-    public void atualizar(Funcionario funcionario) throws Exception {
+    public void atualizar(Cliente cliente) throws Exception {
         Connection conn = null;
         PreparedStatement stmt = null;
 
@@ -104,10 +104,10 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
             String sql = "UPDATE funcionarios SET nome = ?, funcao = ?, dt = ? WHERE id = ?";
 
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, funcionario.getNome());
-            stmt.setString(2, funcionario.getFuncao());
-            stmt.setDate(3, Date.valueOf(funcionario.getDataAdmissao()));
-            stmt.setString(4, funcionario.getId());
+            stmt.setString(1, cliente.getNome());
+            stmt.setString(2, cliente.getFuncao());
+            stmt.setDate(3, Date.valueOf(cliente.getDataAdmissao()));
+            stmt.setString(4, cliente.getId());
 
             stmt.executeUpdate();
         } finally {
@@ -176,13 +176,13 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
         }
     }
 
-    private Funcionario mapearResultSet(ResultSet rs) throws SQLException {
-        Funcionario funcionario = new Funcionario();
-        funcionario.setId(rs.getString("id"));
-        funcionario.setNome(rs.getString("nome"));
-        funcionario.setCpf(rs.getString("cpf"));
-        funcionario.setFuncao(rs.getString("funcao"));
-        funcionario.setDataAdmissao(rs.getDate("dt").toLocalDate());
-        return funcionario;
+    private Cliente mapearResultSet(ResultSet rs) throws SQLException {
+        Cliente cliente = new Cliente();
+        cliente.setId(rs.getString("id"));
+        cliente.setNome(rs.getString("nome"));
+        cliente.setCpf(rs.getString("cpf"));
+        cliente.setFuncao(rs.getString("funcao"));
+        cliente.setDataAdmissao(rs.getDate("dt").toLocalDate());
+        return cliente;
     }
 }

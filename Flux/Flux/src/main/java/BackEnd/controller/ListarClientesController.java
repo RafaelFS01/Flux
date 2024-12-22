@@ -1,5 +1,6 @@
 package BackEnd.controller;
 
+import BackEnd.model.entity.Cliente;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -13,8 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import BackEnd.model.entity.Funcionario;
-import BackEnd.model.service.FuncionarioService;
+import BackEnd.model.service.ClienteService;
 import BackEnd.util.AlertHelper;
 import BackEnd.util.ConnectionFactory;
 import BackEnd.util.DateUtils;
@@ -24,23 +24,23 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class ListarFuncionariosController implements Initializable {
+public class ListarClientesController implements Initializable {
 
     @FXML private TextField pesquisaField;
-    @FXML private TableView<Funcionario> tabelaFuncionarios;
-    @FXML private TableColumn<Funcionario, String> colunaId;
-    @FXML private TableColumn<Funcionario, String> colunaNome;
-    @FXML private TableColumn<Funcionario, String> colunaCpf;
-    @FXML private TableColumn<Funcionario, String> colunaFuncao;
-    @FXML private TableColumn<Funcionario, String> colunaData;
-    @FXML private TableColumn<Funcionario, Void> colunaAcoes;
+    @FXML private TableView<Cliente> tabelaFuncionarios;
+    @FXML private TableColumn<Cliente, String> colunaId;
+    @FXML private TableColumn<Cliente, String> colunaNome;
+    @FXML private TableColumn<Cliente, String> colunaCpf;
+    @FXML private TableColumn<Cliente, String> colunaFuncao;
+    @FXML private TableColumn<Cliente, String> colunaData;
+    @FXML private TableColumn<Cliente, Void> colunaAcoes;
     @FXML private Label statusLabel;
 
-    private final FuncionarioService funcionarioService;
-    private ObservableList<Funcionario> funcionarios;
+    private final ClienteService clienteService;
+    private ObservableList<Cliente> clientes;
 
-    public ListarFuncionariosController() {
-        this.funcionarioService = new FuncionarioService();
+    public ListarClientesController() {
+        this.clienteService = new ClienteService();
     }
 
     @Override
@@ -95,8 +95,8 @@ public class ListarFuncionariosController implements Initializable {
 
     private void configurarPesquisa() {
         pesquisaField.textProperty().addListener((obs, old, novo) -> {
-            if (funcionarios != null) {
-                FilteredList<Funcionario> dadosFiltrados = new FilteredList<>(funcionarios);
+            if (clientes != null) {
+                FilteredList<Cliente> dadosFiltrados = new FilteredList<>(clientes);
                 dadosFiltrados.setPredicate(funcionario -> {
                     if (novo == null || novo.isEmpty()) {
                         return true;
@@ -126,23 +126,23 @@ public class ListarFuncionariosController implements Initializable {
 
     private void carregarFuncionarios() {
         try {
-            funcionarios = FXCollections.observableArrayList(funcionarioService.listarTodos());
-            tabelaFuncionarios.setItems(funcionarios);
+            clientes = FXCollections.observableArrayList(clienteService.listarTodos());
+            tabelaFuncionarios.setItems(clientes);
             atualizarStatusLabel();
         } catch (Exception e) {
             AlertHelper.showError("Erro", "Erro ao carregar funcionários: " + e.getMessage());
         }
     }
 
-    private void editarFuncionario(Funcionario funcionario) {
-        if (funcionario != null) {
+    private void editarFuncionario(Cliente cliente) {
+        if (cliente != null) {
             try {
                 FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource("/fxml/editar-funcionario.fxml"));
+                        getClass().getResource("/fxml/EditarFuncionario.fxml"));
                 VBox dialogContent = loader.load();
 
                 EditarFuncionarioController controller = loader.getController();
-                controller.setFuncionario(funcionario);
+                controller.setFuncionario(cliente);
 
                 Stage dialogStage = new Stage();
                 dialogStage.initModality(Modality.APPLICATION_MODAL);
@@ -165,8 +165,8 @@ public class ListarFuncionariosController implements Initializable {
         }
     }
 
-    private void deletarFuncionario(Funcionario funcionario) {
-        if (funcionario != null) {
+    private void deletarFuncionario(Cliente cliente) {
+        if (cliente != null) {
             try {
 
                 Optional<ButtonType> result = AlertHelper.showConfirmation(
@@ -174,11 +174,11 @@ public class ListarFuncionariosController implements Initializable {
                         "Deseja realmente excluir o funcionário?",
                         String.format("Funcionário: %s%nCódigo: %s%n%n" +
                                         "Esta ação não poderá ser desfeita.",
-                                funcionario.getNome(), funcionario.getId())
+                                cliente.getNome(), cliente.getId())
                 );
 
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    funcionarioService.excluirFuncionario(funcionario.getId());
+                    clienteService.excluirFuncionario(cliente.getId());
                     ConnectionFactory.exportarBancoDeDados("BACKUP.2024");
                     carregarFuncionarios();
                     AlertHelper.showSuccess("Funcionário excluído com sucesso!");

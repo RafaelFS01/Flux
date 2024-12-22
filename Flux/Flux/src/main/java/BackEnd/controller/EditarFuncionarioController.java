@@ -1,11 +1,11 @@
 package BackEnd.controller;
 
+import BackEnd.model.entity.Cliente;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import BackEnd.model.entity.Funcionario;
-import BackEnd.model.service.FuncionarioService;
+import BackEnd.model.service.ClienteService;
 import BackEnd.util.AlertHelper;
 import BackEnd.util.ConnectionFactory;
 import BackEnd.util.ValidationHelper;
@@ -22,12 +22,12 @@ public class EditarFuncionarioController implements Initializable {
     @FXML private DatePicker dataAdmissaoField;
     @FXML private Label mensagemErro;
 
-    private final FuncionarioService funcionarioService;
-    private Funcionario funcionario;
+    private final ClienteService clienteService;
+    private Cliente cliente;
     private boolean modoEdicao;
 
     public EditarFuncionarioController() {
-        this.funcionarioService = new FuncionarioService();
+        this.clienteService = new ClienteService();
     }
 
     @Override
@@ -35,9 +35,9 @@ public class EditarFuncionarioController implements Initializable {
         configurarCampos();
     }
 
-    public void setFuncionario(Funcionario funcionario) {
-        this.funcionario = funcionario;
-        this.modoEdicao = funcionario != null;
+    public void setFuncionario(Cliente cliente) {
+        this.cliente = cliente;
+        this.modoEdicao = cliente != null;
         atualizarTitulo();
         preencherCampos();
     }
@@ -46,17 +46,17 @@ public class EditarFuncionarioController implements Initializable {
     private void salvar() {
         try {
             if (validarCampos()) {
-                Funcionario func = modoEdicao ? funcionario : new Funcionario();
+                Cliente func = modoEdicao ? cliente : new Cliente();
                 func.setId(codigoField.getText());
                 func.setNome(nomeField.getText());
                 func.setFuncao(funcaoField.getText());
                 func.setDataAdmissao(dataAdmissaoField.getValue());
 
                 if (modoEdicao) {
-                    funcionarioService.atualizar(func);
+                    clienteService.atualizar(func);
                     AlertHelper.showSuccess("Funcionário atualizado com sucesso!");
                 } else {
-                    funcionarioService.criar(func);
+                    clienteService.criar(func);
                     AlertHelper.showSuccess("Funcionário cadastrado com sucesso!");
                 }
                 ConnectionFactory.exportarBancoDeDados("BACKUP.2024");
@@ -74,7 +74,7 @@ public class EditarFuncionarioController implements Initializable {
 
             if (ValidationHelper.isNullOrEmpty(codigoField.getText())) {
                 erros.append("O código é obrigatório\n");
-            } else if (!modoEdicao && funcionarioService.existePorId(codigoField.getText())) {
+            } else if (!modoEdicao && clienteService.existePorId(codigoField.getText())) {
                 erros.append("Já existe um funcionário com este código\n");
             }
 
@@ -131,11 +131,11 @@ public class EditarFuncionarioController implements Initializable {
     }
 
     private void preencherCampos() {
-        if (modoEdicao && funcionario != null) {
-            codigoField.setText(funcionario.getId());
-            nomeField.setText(funcionario.getNome());
-            funcaoField.setText(funcionario.getFuncao());
-            dataAdmissaoField.setValue(funcionario.getDataAdmissao());
+        if (modoEdicao && cliente != null) {
+            codigoField.setText(cliente.getId());
+            nomeField.setText(cliente.getNome());
+            funcaoField.setText(cliente.getFuncao());
+            dataAdmissaoField.setValue(cliente.getDataAdmissao());
         } else {
             dataAdmissaoField.setValue(LocalDate.now());
         }

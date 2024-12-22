@@ -3,8 +3,8 @@ package BackEnd.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import BackEnd.model.entity.Funcionario;
-import BackEnd.model.service.FuncionarioService;
+import BackEnd.model.entity.Cliente;
+import BackEnd.model.service.ClienteService;
 import BackEnd.util.ConnectionFactory;
 
 import java.time.LocalDate;
@@ -21,10 +21,10 @@ public class CadastrarClienteController {
     @FXML
     private DatePicker dataAdmissaoField;
 
-    private final FuncionarioService funcionarioService;
+    private final ClienteService clienteService;
 
     public CadastrarClienteController() {
-        this.funcionarioService = new FuncionarioService();
+        this.clienteService = new ClienteService();
     }
 
     @FXML
@@ -56,14 +56,14 @@ public class CadastrarClienteController {
                 return;
             }
 
-            Funcionario funcionario = new Funcionario();
-            funcionario.setId(idField.getText().trim());
-            funcionario.setNome(nomeField.getText().trim());
-            funcionario.setCpf(cpfField.getText().trim());
-            funcionario.setFuncao(funcaoField.getText().trim());
-            funcionario.setDataAdmissao(dataAdmissaoField.getValue()); // Agora passa o LocalDate diretamente
+            Cliente cliente = new Cliente();
+            cliente.setId(idField.getText().trim());
+            cliente.setNome(nomeField.getText().trim());
+            cliente.setCpf(cpfField.getText().trim());
+            cliente.setFuncao(funcaoField.getText().trim());
+            cliente.setDataAdmissao(dataAdmissaoField.getValue()); // Agora passa o LocalDate diretamente
 
-            funcionarioService.cadastrarFuncionario(funcionario);
+            clienteService.cadastrarFuncionario(cliente);
             ConnectionFactory.exportarBancoDeDados("BACKUP.2024");
             mostrarMensagem("Sucesso", "Funcionário cadastrado com sucesso!", Alert.AlertType.INFORMATION);
             limparFormulario();

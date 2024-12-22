@@ -1,60 +1,60 @@
 package BackEnd.model.service;
 
-import BackEnd.model.dao.interfaces.FuncionarioDAO;
-import BackEnd.model.dao.impl.FuncionarioDAOImpl;
-import BackEnd.model.entity.Funcionario;
+import BackEnd.model.dao.interfaces.ClienteDAO;
+import BackEnd.model.dao.impl.ClienteDAOImpl;
+import BackEnd.model.entity.Cliente;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class FuncionarioService {
-    private final FuncionarioDAO funcionarioDAO;
+public class ClienteService {
+    private final ClienteDAO clienteDAO;
 
-    public FuncionarioService() {
-        this.funcionarioDAO = new FuncionarioDAOImpl();
+    public ClienteService() {
+        this.clienteDAO = new ClienteDAOImpl();
     }
 
-    public void cadastrarFuncionario(Funcionario funcionario) throws Exception {
-        validarFuncionario(funcionario);
+    public void cadastrarFuncionario(Cliente cliente) throws Exception {
+        validarFuncionario(cliente);
 
-        if (existePorId(funcionario.getId())) {
+        if (existePorId(cliente.getId())) {
             throw new IllegalArgumentException("Já existe um funcionário com este ID.");
         }
 
-        if (existePorCPF(funcionario.getCpf())) {
+        if (existePorCPF(cliente.getCpf())) {
             throw new IllegalArgumentException("Já existe um funcionário com este CPF.");
         }
 
         try {
-            funcionarioDAO.criar(funcionario);
+            clienteDAO.criar(cliente);
         } catch (Exception e) {
             throw new Exception("Erro ao cadastrar funcionário: " + e.getMessage());
         }
     }
 
-    public void criar(Funcionario funcionario) throws Exception {
-        validarFuncionario(funcionario);
+    public void criar(Cliente cliente) throws Exception {
+        validarFuncionario(cliente);
 
-        if (existePorId(funcionario.getId())) {
+        if (existePorId(cliente.getId())) {
             throw new IllegalArgumentException("Já existe um funcionário com este ID");
         }
 
         try {
-            funcionarioDAO.criar(funcionario);
+            clienteDAO.criar(cliente);
         } catch (Exception e) {
             throw new Exception("Erro ao criar funcionário: " + e.getMessage());
         }
     }
 
-    public void atualizar(Funcionario funcionario) throws Exception {
-        validarFuncionario(funcionario);
+    public void atualizar(Cliente cliente) throws Exception {
+        validarFuncionario(cliente);
 
-        if (!existePorId(funcionario.getId())) {
+        if (!existePorId(cliente.getId())) {
             throw new IllegalArgumentException("Funcionário não encontrado");
         }
 
         try {
-            funcionarioDAO.atualizar(funcionario);
+            clienteDAO.atualizar(cliente);
         } catch (Exception e) {
             throw new Exception("Erro ao atualizar funcionário: " + e.getMessage());
         }
@@ -62,30 +62,30 @@ public class FuncionarioService {
 
     public void excluirFuncionario(String id) throws Exception {
         try {
-            if (funcionarioDAO.verificarEmprestimosAtivos(id)) {
+            if (clienteDAO.verificarEmprestimosAtivos(id)) {
                 throw new IllegalStateException("Não é possível excluir funcionário com empréstimos ativos");
             }
-            funcionarioDAO.deletar(id);
+            clienteDAO.deletar(id);
         } catch (Exception e) {
             throw new Exception("Erro ao excluir funcionário: " + e.getMessage());
         }
     }
 
-    public Funcionario buscarPorId(String id) throws Exception {
+    public Cliente buscarPorId(String id) throws Exception {
         try {
-            Funcionario funcionario = funcionarioDAO.buscarPorId(id);
-            if (funcionario == null) {
+            Cliente cliente = clienteDAO.buscarPorId(id);
+            if (cliente == null) {
                 throw new IllegalArgumentException("Funcionário não encontrado");
             }
-            return funcionario;
+            return cliente;
         } catch (Exception e) {
             throw new Exception("Erro ao buscar funcionário: " + e.getMessage());
         }
     }
 
-    public List<Funcionario> listarTodos() throws Exception {
+    public List<Cliente> listarTodos() throws Exception {
         try {
-            return funcionarioDAO.listarTodos();
+            return clienteDAO.listarTodos();
         } catch (Exception e) {
             throw new Exception("Erro ao listar funcionários: " + e.getMessage());
         }
@@ -93,7 +93,7 @@ public class FuncionarioService {
 
     public boolean existePorId(String id) throws Exception {
         try {
-            return funcionarioDAO.buscarPorId(id) != null;
+            return clienteDAO.buscarPorId(id) != null;
         } catch (Exception e) {
             throw new Exception("Erro ao verificar existência do funcionário: " + e.getMessage());
         }
@@ -101,39 +101,39 @@ public class FuncionarioService {
 
     public boolean existePorCPF(String cpf) throws Exception {
         try {
-            return funcionarioDAO.buscarPorCPF(cpf) != null;
+            return clienteDAO.buscarPorCPF(cpf) != null;
         } catch (Exception e) {
             throw new Exception("Erro ao verificar existência do funcionário: " + e.getMessage());
         }
     }
 
-    private void validarFuncionario(Funcionario funcionario) {
-        if (funcionario == null) {
+    private void validarFuncionario(Cliente cliente) {
+        if (cliente == null) {
             throw new IllegalArgumentException("Funcionário não pode ser nulo");
         }
-        if (funcionario.getId() == null || funcionario.getId().trim().isEmpty()) {
+        if (cliente.getId() == null || cliente.getId().trim().isEmpty()) {
             throw new IllegalArgumentException("ID do funcionário é obrigatório");
         }
-        if (funcionario.getNome() == null || funcionario.getNome().trim().isEmpty()) {
+        if (cliente.getNome() == null || cliente.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("Nome é obrigatório");
         }
-        if (funcionario.getCpf() == null || funcionario.getCpf().trim().isEmpty()) {
+        if (cliente.getCpf() == null || cliente.getCpf().trim().isEmpty()) {
             throw new IllegalArgumentException("CPF é obrigatório");
         }
-        if (funcionario.getFuncao() == null || funcionario.getFuncao().trim().isEmpty()) {
+        if (cliente.getFuncao() == null || cliente.getFuncao().trim().isEmpty()) {
             throw new IllegalArgumentException("Função é obrigatória");
         }
-        if (funcionario.getDataAdmissao() == null) {
+        if (cliente.getDataAdmissao() == null) {
             throw new IllegalArgumentException("Data de admissão é obrigatória");
         }
-        if (funcionario.getDataAdmissao().isAfter(LocalDate.now())) {
+        if (cliente.getDataAdmissao().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Data de admissão não pode ser futura");
         }
     }
 
     public boolean possuiEmprestimosAtivos(String id) throws Exception {
         try {
-            return funcionarioDAO.verificarEmprestimosAtivos(id);
+            return clienteDAO.verificarEmprestimosAtivos(id);
         } catch (Exception e) {
             throw new Exception("Erro ao verificar empréstimos ativos: " + e.getMessage());
         }

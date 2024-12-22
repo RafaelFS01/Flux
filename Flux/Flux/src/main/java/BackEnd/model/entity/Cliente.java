@@ -2,7 +2,7 @@ package BackEnd.model.entity;
 
 import java.time.LocalDate;
 
-public class Funcionario {
+public class Cliente {
     private String id;
     private String nome;
     private String cpf;

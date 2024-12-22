@@ -5,7 +5,7 @@
 <?import javafx.scene.text.Font?>
 
 <StackPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" styleClass="form-container"
-           fx:controller="BackEnd.controller.CadastroItemController">
+           fx:controller="BackEnd.controller.CadastrarItemController">
 
     <!-- Container principal centralizado -->
     <VBox alignment="CENTER" spacing="2" maxWidth="800">
