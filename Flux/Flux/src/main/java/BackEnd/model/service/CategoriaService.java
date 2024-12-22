@@ -1,5 +1,6 @@
 package BackEnd.model.service;
 
+import BackEnd.model.dao.impl.CategoriaDAOImpl;
 import BackEnd.model.dao.interfaces.CategoriaDAO;
 import BackEnd.model.entity.Categoria;
 import BackEnd.util.ValidationHelper;
@@ -10,8 +11,8 @@ public class CategoriaService {
 
     private final CategoriaDAO categoriaDAO;
 
-    public CategoriaService(CategoriaDAO categoriaDAO) {
-        this.categoriaDAO = categoriaDAO;
+    public CategoriaService(){
+        this.categoriaDAO = new CategoriaDAOImpl();
     }
 
     public void salvarCategoria(Categoria categoria) throws Exception {

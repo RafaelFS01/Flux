@@ -25,10 +25,12 @@ quantidade_estoque INT NOT NULL,
 quantidade_minima INT NOT NULL,
 quantidade_atual INT NOT NULL DEFAULT 0,
 categoria_id INT,
-embalagem_id INT,
+embalagem_primaria_id INT,
+embalagem_secundaria_id INT,
 etiqueta_id INT,
 FOREIGN KEY (categoria_id) REFERENCES categorias(id),
-FOREIGN KEY (embalagem_id) REFERENCES categorias(id),
+FOREIGN KEY (embalagem_primaria_id) REFERENCES categorias(id),
+FOREIGN KEY (embalagem_secundaria_id) REFERENCES categorias(id),
 FOREIGN KEY (etiqueta_id) REFERENCES categorias(id)
 );
 

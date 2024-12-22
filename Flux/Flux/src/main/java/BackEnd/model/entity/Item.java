@@ -13,7 +13,8 @@ public class Item {
     private Integer quantidadeMinima;
     private Integer quantidadeAtual;
     private Categoria categoria; // Categoria principal
-    private Categoria embalagem;  // Categoria de embalagem
+    private Categoria embalagemPrimaria;  // Categoria de embalagem
+    private Categoria embalagemSecundaria;  // Categoria de embalagem
     private Categoria etiqueta;   // Categoria de etiqueta
 
     // Getters e Setters
@@ -98,12 +99,20 @@ public class Item {
         this.categoria = categoria;
     }
 
-    public Categoria getEmbalagem() {
-        return embalagem;
+    public Categoria getEmbalagemPrimaria() {
+        return embalagemPrimaria;
     }
 
-    public void setEmbalagem(Categoria embalagem) {
-        this.embalagem = embalagem;
+    public void setEmbalagemPrimaria(Categoria embalagemPrimaria) {
+        this.embalagemPrimaria = embalagemPrimaria;
+    }
+
+    public Categoria getEmbalagemSecundaria() {
+        return embalagemSecundaria;
+    }
+
+    public void setEmbalagemSecundaria(Categoria embalagemSecundaria) {
+        this.embalagemSecundaria = embalagemSecundaria;
     }
 
     public Categoria getEtiqueta() {

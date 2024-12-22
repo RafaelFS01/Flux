@@ -1,5 +1,7 @@
 package BackEnd.model.service;
 
+import BackEnd.model.dao.impl.CategoriaDAOImpl;
+import BackEnd.model.dao.impl.ItemDAOImpl;
 import BackEnd.model.dao.interfaces.CategoriaDAO;
 import BackEnd.model.dao.interfaces.ItemDAO;
 import BackEnd.model.entity.Categoria;
@@ -11,12 +13,12 @@ import java.util.List;
 
 public class ItemService {
 
-    private ItemDAO itemDAO = null;
-    private CategoriaDAO categoriaDAO = null;
+    private final ItemDAO itemDAO;
+    private final CategoriaDAO categoriaDAO;
 
     public ItemService() {
-        this.itemDAO = itemDAO;
-        this.categoriaDAO = categoriaDAO;
+        this.itemDAO = new ItemDAOImpl();
+        this.categoriaDAO = new CategoriaDAOImpl();
     }
 
     public void salvarItem(Item item) throws Exception {
@@ -24,12 +26,14 @@ public class ItemService {
 
         // Garantir que as categorias existam e obter seus IDs
         Categoria categoria = categoriaDAO.salvarCategoria(item.getCategoria());
-        Categoria embalagem = categoriaDAO.salvarCategoria(item.getEmbalagem());
+        Categoria embalagemPrimaria = categoriaDAO.salvarCategoria(item.getEmbalagemPrimaria());
+        Categoria embalagemSecundaria = categoriaDAO.salvarCategoria(item.getEmbalagemSecundaria());
         Categoria etiqueta = categoriaDAO.salvarCategoria(item.getEtiqueta());
 
         // Atualizar o item com as categorias persistidas (com IDs)
         item.setCategoria(categoria);
-        item.setEmbalagem(embalagem);
+        item.setEmbalagemPrimaria(embalagemPrimaria);
+        item.setEmbalagemSecundaria(embalagemSecundaria);
         item.setEtiqueta(etiqueta);
 
         itemDAO.salvarItem(item);
@@ -40,6 +44,10 @@ public class ItemService {
 
     private void validarItem(Item item) throws Exception {
         StringBuilder erros = new StringBuilder();
+
+        if (ValidationHelper.isNullOrEmpty(item.getId())) {
+            erros.append("O código é obrigatório.\n");
+        }
 
         if (ValidationHelper.isNullOrEmpty(item.getNome())) {
             erros.append("O nome é obrigatório.\n");
@@ -93,8 +101,12 @@ public class ItemService {
             erros.append("Selecione uma categoria.\n");
         }
 
-        if (item.getEmbalagem() == null) {
-            erros.append("Selecione uma embalagem.\n");
+        if (item.getEmbalagemPrimaria() == null) {
+            erros.append("Selecione uma embalagem primária.\n");
+        }
+
+        if (item.getEmbalagemSecundaria() == null) {
+            erros.append("Selecione uma embalagem secundária.\n");
         }
 
         if (item.getEtiqueta() == null) {
