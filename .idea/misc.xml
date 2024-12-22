@@ -5,6 +5,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/TrackBug-master-mvc/TrackBug/pom.xml" />
+        <option value="$PROJECT_DIR$/Flux/Flux/pom.xml" />
       </list>
     </option>
   </component>
