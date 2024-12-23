@@ -9,5 +9,8 @@
         <module name="Flux" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="TrackBug" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

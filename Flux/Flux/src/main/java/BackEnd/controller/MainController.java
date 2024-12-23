@@ -49,7 +49,7 @@ public class MainController {
 
     @FXML
     private void mostrarRegistroEquipamento() {
-        carregarFXML("/fxml/CadastroItem.fxml");
+        carregarFXML("/fxml/CadastrarItem.fxml");
     }
 
     @FXML

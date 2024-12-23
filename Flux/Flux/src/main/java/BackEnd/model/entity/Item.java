@@ -3,7 +3,7 @@
 package BackEnd.model.entity;
 
 public class Item {
-    private String id;
+    private int id;
     private String nome;
     private String descricao;
     private Double precoVenda;
@@ -16,11 +16,11 @@ public class Item {
 
     // Getters e Setters
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

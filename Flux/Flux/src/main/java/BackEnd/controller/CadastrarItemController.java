@@ -1,5 +1,6 @@
 package BackEnd.controller;
 
+import BackEnd.model.service.DependenciaService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -8,7 +9,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -35,14 +38,41 @@ public class CadastrarItemController implements Initializable {
     @FXML private TextField unidadeMedidaField;
     @FXML private TextField quantidadeEstoqueField;
     @FXML private TextField quantidadeMinimaField;
+    @FXML private TextField dependencia1Field;
+    @FXML private TextField dependencia2Field;
+    @FXML private TextField dependencia3Field;
+    @FXML private TextField dependencia4Field;
+    @FXML private Label dependencia1Label;
+    @FXML private Label dependencia2Label;
+    @FXML private Label dependencia3Label;
+    @FXML private Label dependencia4Label;
+    @FXML private Button adicionarDependencia2Button;
+    @FXML private Button adicionarDependencia3Button;
+    @FXML private Button adicionarDependencia4Button;
+
     @FXML private ComboBox<Categoria> categoriaComboBox;
 
     private final ItemService itemService;
     private final CategoriaService categoriaService;
+    private final DependenciaService dependenciaService;
+
+    // Variável estática para armazenar o ID do último item salvo
+    private static int idItemAtual;
+
+    // Método estático para definir o ID do item atual
+    public void setIdItemAtual(int id) {
+        idItemAtual = id;
+    }
+
+    // Método estático para obter o ID do item atual
+    public static int obterIdItem() {
+        return idItemAtual;
+    }
 
     public CadastrarItemController() {
         this.itemService = new ItemService();
         this.categoriaService = new CategoriaService();
+        this.dependenciaService = new DependenciaService();
     }
 
     @Override
@@ -109,6 +139,9 @@ public class CadastrarItemController implements Initializable {
         try {
             Item item = criarItem();
             itemService.salvarItem(item);
+            // Atualiza o idItemAtual com o ID do item recém-salvo
+            setIdItemAtual(Integer.valueOf(item.getId()));
+
             AlertHelper.showSuccess("Item salvo com sucesso!");
             limparCampos();
         } catch (Exception e) {
@@ -118,7 +151,7 @@ public class CadastrarItemController implements Initializable {
 
     private Item criarItem() {
         Item item = new Item();
-        item.setId(idField.getText().trim());
+        item.setId(Integer.parseInt(idField.getText().trim()));
         item.setNome(nomeField.getText().trim());
         item.setDescricao(descricaoField.getText().trim());
         item.setPrecoVenda(Double.parseDouble(precoVendaField.getText()));
@@ -147,7 +180,7 @@ public class CadastrarItemController implements Initializable {
     @FXML
     private void abrirCadastroCategoria(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CadastroCategoria.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CadastrarCategoria.fxml"));
             Parent root = loader.load();
 
             CadastrarCategoriaController controller = loader.getController();
@@ -163,6 +196,127 @@ public class CadastrarItemController implements Initializable {
 
         } catch (IOException e) {
             AlertHelper.showError("Erro ao abrir a janela de cadastro de categoria", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void abrirAdicionarDependencia1(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdicionarDependencia.fxml"));
+            Parent root = loader.load();
+            Button botaoAdicionarDependencia = (Button) event.getSource();
+
+            AdicionarDependenciaController controller = loader.getController();
+            // Passe o ID do item dependente para o controller da janela AdicionarDependencia
+            int idItemDependente = Integer.parseInt(idField.getText().trim()); // Obtenha o ID do campo idField
+            controller.setIdItemDependente(idItemDependente);
+
+
+            Stage stage = new Stage();
+            stage.setTitle("Adicionar Dependência");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/icon.png")));
+            stage.showAndWait();
+            // Fazer os campos e botão aparecerem
+            dependencia1Field.visibleProperty().setValue(true);
+            dependencia1Field.managedProperty().setValue(true);
+            dependencia1Label.visibleProperty().setValue(true);
+            dependencia1Label.managedProperty().setValue(true);
+            adicionarDependencia2Button.visibleProperty().setValue(true);
+            adicionarDependencia2Button.managedProperty().setValue(true);
+            // Fazer o botão desaparecer
+            botaoAdicionarDependencia.setVisible(false);
+            botaoAdicionarDependencia.setManaged(false);
+
+        } catch (IOException e) {
+            AlertHelper.showError("Erro ao abrir a janela de adição de dependência.", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void abrirAdicionarDependencia2(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdicionarDependencia.fxml"));
+            Parent root = loader.load();
+            Button botaoAdicionarDependencia = (Button) event.getSource();
+
+
+            Stage stage = new Stage();
+            stage.setTitle("Adicionar Dependência");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/icon.png")));
+            stage.showAndWait();
+            // Fazer os campos e botão aparecerem
+            dependencia2Field.visibleProperty().setValue(true);
+            dependencia2Field.managedProperty().setValue(true);
+            dependencia2Label.visibleProperty().setValue(true);
+            dependencia2Label.managedProperty().setValue(true);
+            adicionarDependencia3Button.visibleProperty().setValue(true);
+            adicionarDependencia3Button.managedProperty().setValue(true);
+            // Fazer o botão desaparecer
+            botaoAdicionarDependencia.setVisible(false);
+            botaoAdicionarDependencia.setManaged(false);
+        } catch (IOException e) {
+            AlertHelper.showError("Erro ao abrir a janela de adição de dependência.", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void abrirAdicionarDependencia3(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdicionarDependencia.fxml"));
+            Parent root = loader.load();
+            Button botaoAdicionarDependencia = (Button) event.getSource();
+
+
+            Stage stage = new Stage();
+            stage.setTitle("Adicionar Dependência");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/icon.png")));
+            stage.showAndWait();
+            // Fazer os campos e botão aparecerem
+            dependencia3Field.visibleProperty().setValue(true);
+            dependencia3Field.managedProperty().setValue(true);
+            dependencia3Label.visibleProperty().setValue(true);
+            dependencia3Label.managedProperty().setValue(true);
+            adicionarDependencia4Button.visibleProperty().setValue(true);
+            adicionarDependencia4Button.managedProperty().setValue(true);
+            // Fazer o botão desaparecer
+            botaoAdicionarDependencia.setVisible(false);
+            botaoAdicionarDependencia.setManaged(false);
+        } catch (IOException e) {
+            AlertHelper.showError("Erro ao abrir a janela de adição de dependência.", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void abrirAdicionarDependencia4(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdicionarDependencia.fxml"));
+            Parent root = loader.load();
+            Button botaoAdicionarDependencia = (Button) event.getSource();
+
+
+            Stage stage = new Stage();
+            stage.setTitle("Adicionar Dependência");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/icon.png")));
+            stage.showAndWait();
+            // Fazer os campos e botão aparecerem
+            dependencia4Field.visibleProperty().setValue(true);
+            dependencia4Field.managedProperty().setValue(true);
+            dependencia4Label.visibleProperty().setValue(true);
+            dependencia4Label.managedProperty().setValue(true);
+            // Fazer o botão desaparecer
+            botaoAdicionarDependencia.setVisible(false);
+            botaoAdicionarDependencia.setManaged(false);
+
+        } catch (IOException e) {
+            AlertHelper.showError("Erro ao abrir a janela de adição de dependência.", e.getMessage());
         }
     }
 }

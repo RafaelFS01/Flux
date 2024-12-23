@@ -27,6 +27,18 @@ categoria_id INT,
 FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
 
+CREATE TABLE Dependencias (
+id INT PRIMARY KEY AUTO_INCREMENT,
+id_item_dependente INT NOT NULL,
+id_item_necessario INT NOT NULL,
+id_categoria INT NOT NULL,
+quantidade DECIMAL(10, 2) NOT NULL,
+FOREIGN KEY (id_item_dependente) REFERENCES itens(id),
+FOREIGN KEY (id_item_necessario) REFERENCES itens(id),
+FOREIGN KEY (id_categoria) REFERENCES categorias(id),
+CONSTRAINT check_quantidade CHECK (quantidade > 0)
+);
+
 CREATE TABLE funcionarios (
 id VARCHAR(200) PRIMARY KEY,
 nome VARCHAR(200),

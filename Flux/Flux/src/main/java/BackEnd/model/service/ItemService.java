@@ -38,7 +38,7 @@ public class ItemService {
     private void validarItem(Item item) throws Exception {
         StringBuilder erros = new StringBuilder();
 
-        if (ValidationHelper.isNullOrEmpty(item.getId())) {
+        if (ValidationHelper.isNullOrEmpty(String.valueOf(item.getId()))) {
             erros.append("O código é obrigatório.\n");
         }
 
@@ -107,11 +107,16 @@ public class ItemService {
     public Item buscarItemPorId(int id) throws Exception {
         return itemDAO.buscarItemPorId(id);
     }
+
+    public List<Item> listarItensPorCategoria(int idCategoria) throws Exception {
+        return itemDAO.listarItensPorCategoria(idCategoria);
+    }
+
     public List<Item> listarItens() throws Exception {
         return itemDAO.listarItens();
     }
 
-    public void deletar(String id) throws Exception {
+    public void deletar(int id) throws Exception {
         itemDAO.deletar(id);
     }
 }

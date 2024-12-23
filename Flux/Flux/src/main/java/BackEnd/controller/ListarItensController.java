@@ -68,8 +68,9 @@ public class ListarItensController implements Initializable {
     }
 
     private void configurarColunas() {
-        colunaId.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getId()));
+        colunaId.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                String.valueOf(data.getValue().getId())
+        ));
 
         colunaDescricao.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleStringProperty(data.getValue().getDescricao()));
@@ -171,7 +172,7 @@ public class ListarItensController implements Initializable {
         dadosFiltrados.setPredicate(equipamento -> {
             boolean matchBusca = textoBusca.isEmpty() ||
                     equipamento.getDescricao().toLowerCase().contains(textoBusca) ||
-                    equipamento.getId().toLowerCase().contains(textoBusca);
+                    String.valueOf(equipamento.getId()).contains(textoBusca);
 
 
             String status;

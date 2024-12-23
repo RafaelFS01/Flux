@@ -10,6 +10,7 @@ public interface ItemDAO {
     boolean buscarItemPorNome(String nome) throws Exception;
     Item buscarItemPorId(int id) throws Exception;
     List<Item> listarItens() throws Exception;
+    List<Item> listarItensPorCategoria(int idCategoria) throws Exception;
     List<Item> listarItensAbaixoDoMinimo() throws Exception;
-    void deletar(String id) throws Exception;
+    void deletar(int id) throws Exception;
 }

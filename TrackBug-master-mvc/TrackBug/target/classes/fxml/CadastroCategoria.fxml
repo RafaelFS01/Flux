@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" styleClass="form-container"
+           fx:controller="trackbug.controller.CadastroCategoriaController">
+
+    <!-- Container principal centralizado -->
+    <VBox alignment="CENTER" spacing="30" maxWidth="800">
+        <!-- Cabeçalho -->
+        <VBox styleClass="form-header" alignment="CENTER">
+            <Label text="Cadastrar Nova Categoria" styleClass="form-title"/>
+            <Label text="Preencha os dados da nova categoria" styleClass="form-subtitle"/>
+        </VBox>
+
+        <!-- Container do formulário -->
+        <VBox styleClass="form-content-container" alignment="CENTER" maxWidth="600">
+            <padding>
+                <Insets top="20" right="30" bottom="20" left="30"/>
+            </padding>
+
+            <!-- Grid do formulário -->
+            <GridPane hgap="15" vgap="15" alignment="CENTER">
+                <!-- Nome -->
+                <Label text="Nome:" styleClass="form-label"
+                       GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="nomeField" promptText="Digite o nome da categoria" styleClass="form-field"
+                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <!-- Descrição -->
+                <Label text="Descrição:" styleClass="form-label"
+                       GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="descricaoField" promptText="Digite a descrição" styleClass="form-field"
+                           GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <!-- Tipo -->
+                <Label text="Tipo:" styleClass="form-label"
+                       GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="tipoField" editable="false" styleClass="form-field"
+                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+            </GridPane>
+
+            <!-- Botões -->
+            <HBox spacing="10" alignment="CENTER">
+                <padding>
+                    <Insets top="20"/>
+                </padding>
+                <Button text="Salvar" onAction="#salvarCategoria" styleClass="btn-primary"/>
+                <Button text="Cancelar" onAction="#fecharModal" styleClass="btn-secondary"/>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <!-- Margem externa -->
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+</StackPane>
