@@ -17,19 +17,12 @@ public class CadastrarCategoriaController implements Initializable {
 
     @FXML private TextField nomeField;
     @FXML private TextField descricaoField;
-    @FXML private TextField tipoField;
 
     private CategoriaService categoriaService;
 
-    private String tipoCategoria;
 
     public void setCategoriaService(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
-    }
-
-    public void setTipoCategoria(String tipo) {
-        this.tipoCategoria = tipo;
-        tipoField.setText(tipo);
     }
 
     @Override
@@ -63,7 +56,6 @@ public class CadastrarCategoriaController implements Initializable {
         Categoria categoria = new Categoria();
         categoria.setNome(nomeField.getText().trim());
         categoria.setDescricao(descricaoField.getText().trim());
-        categoria.setTipo(tipoCategoria);
         return categoria;
     }
 

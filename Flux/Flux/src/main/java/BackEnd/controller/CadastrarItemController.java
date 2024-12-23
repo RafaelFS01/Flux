@@ -36,10 +36,6 @@ public class CadastrarItemController implements Initializable {
     @FXML private TextField quantidadeEstoqueField;
     @FXML private TextField quantidadeMinimaField;
     @FXML private ComboBox<Categoria> categoriaComboBox;
-    @FXML private ComboBox<Categoria> embalagemComboBox;
-    @FXML private ComboBox<Categoria> embalagemPrimariaComboBox;
-    @FXML private ComboBox<Categoria> embalagemSecundariaComboBox;
-    @FXML private ComboBox<Categoria> etiquetaComboBox;
 
     private final ItemService itemService;
     private final CategoriaService categoriaService;
@@ -53,9 +49,6 @@ public class CadastrarItemController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         configurarCampos();
         carregarCategorias();
-        carregarEmbalagensPrimarias();
-        carregarEmbalagensSecundarias();
-        carregarEtiquetas();
     }
 
     private void configurarCampos() {
@@ -102,42 +95,12 @@ public class CadastrarItemController implements Initializable {
 
     private void carregarCategorias() {
         try {
-            List<Categoria> categoriasList = categoriaService.buscarCategoriasPorTipo("Geral");
+            List<Categoria> categoriasList = categoriaService.listarCategorias();
             ObservableList<Categoria> categorias = FXCollections.observableArrayList(categoriasList);
             categoriaComboBox.setItems(categorias);
         } catch (Exception e) {
             AlertHelper.showError("Erro ao carregar categorias", e.getMessage());
             System.out.println(e.getMessage());
-        }
-    }
-
-    private void carregarEmbalagensPrimarias() {
-        try {
-            List<Categoria> embalagensList = categoriaService.buscarCategoriasPorTipo("Embalagem Primária");
-            ObservableList<Categoria> embalagens = FXCollections.observableArrayList(embalagensList);
-            embalagemPrimariaComboBox.setItems(embalagens);
-        } catch (Exception e) {
-            AlertHelper.showError("Erro ao carregar embalagens", e.getMessage());
-        }
-    }
-
-    private void carregarEmbalagensSecundarias() {
-        try {
-            List<Categoria> embalagensList = categoriaService.buscarCategoriasPorTipo("Embalagem Secundária");
-            ObservableList<Categoria> embalagens = FXCollections.observableArrayList(embalagensList);
-            embalagemSecundariaComboBox.setItems(embalagens);
-        } catch (Exception e) {
-            AlertHelper.showError("Erro ao carregar embalagens", e.getMessage());
-        }
-    }
-
-    private void carregarEtiquetas() {
-        try {
-            List<Categoria> etiquetasList = categoriaService.buscarCategoriasPorTipo("Etiqueta");
-            ObservableList<Categoria> etiquetas = FXCollections.observableArrayList(etiquetasList);
-            etiquetaComboBox.setItems(etiquetas);
-        } catch (Exception e) {
-            AlertHelper.showError("Erro ao carregar etiquetas", e.getMessage());
         }
     }
 
@@ -165,9 +128,6 @@ public class CadastrarItemController implements Initializable {
         item.setQuantidadeMinima(Integer.parseInt(quantidadeMinimaField.getText()));
         item.setQuantidadeAtual(Integer.parseInt(quantidadeEstoqueField.getText()));
         item.setCategoria(categoriaComboBox.getValue());
-        item.setEmbalagemPrimaria(embalagemPrimariaComboBox.getValue());
-        item.setEmbalagemSecundaria(embalagemSecundariaComboBox.getValue());
-        item.setEtiqueta(etiquetaComboBox.getValue());
         return item;
     }
 
@@ -182,39 +142,16 @@ public class CadastrarItemController implements Initializable {
         quantidadeEstoqueField.clear();
         quantidadeMinimaField.clear();
         categoriaComboBox.getSelectionModel().clearSelection();
-        embalagemPrimariaComboBox.getSelectionModel().clearSelection();
-        embalagemSecundariaComboBox.getSelectionModel().clearSelection();
-        etiquetaComboBox.getSelectionModel().clearSelection();
     }
 
     @FXML
     private void abrirCadastroCategoria(ActionEvent event) {
-        abrirModalCategoria("Geral");
-    }
-
-    @FXML
-    private void abrirCadastroEmbalagemPrimária(ActionEvent event) {
-        abrirModalCategoria("Embalagem Primária");
-    }
-
-    @FXML
-    private void abrirCadastroEmbalagemSecundária(ActionEvent event) {
-        abrirModalCategoria("Embalagem Secundária");
-    }
-
-    @FXML
-    private void abrirCadastroEtiqueta(ActionEvent event) {
-        abrirModalCategoria("Etiqueta");
-    }
-
-    private void abrirModalCategoria(String tipo) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CadastroCategoria.fxml"));
             Parent root = loader.load();
 
             CadastrarCategoriaController controller = loader.getController();
             controller.setCategoriaService(categoriaService);
-            controller.setTipoCategoria(tipo);
 
             Stage stage = new Stage();
             stage.setTitle("Cadastrar Categoria");
@@ -222,22 +159,7 @@ public class CadastrarItemController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/icon.png")));
             stage.showAndWait();
-
-            // Atualiza as ComboBoxes após fechar a janela
-            switch (tipo) {
-                case "Geral":
-                    carregarCategorias();
-                    break;
-                case "Embalagem Primária":
-                    carregarEmbalagensPrimarias();
-                    break;
-                case "Embalagem Secundária":
-                    carregarEmbalagensSecundarias();
-                    break;
-                case "Etiqueta":
-                    carregarEtiquetas();
-                    break;
-            }
+            carregarCategorias();
 
         } catch (IOException e) {
             AlertHelper.showError("Erro ao abrir a janela de cadastro de categoria", e.getMessage());

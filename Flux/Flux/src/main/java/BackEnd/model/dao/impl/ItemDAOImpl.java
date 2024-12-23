@@ -31,15 +31,12 @@ public class ItemDAOImpl implements ItemDAO {
 
             // 1. Garantir que as categorias existam e obter seus IDs
             Categoria categoria = categoriaDAO.salvarCategoria(item.getCategoria());
-            Categoria embalagemPrimaria = categoriaDAO.salvarCategoria(item.getEmbalagemPrimaria());
-            Categoria embalagemSecundaria = categoriaDAO.salvarCategoria(item.getEmbalagemSecundaria());
-            Categoria etiqueta = categoriaDAO.salvarCategoria(item.getEtiqueta());
 
             // 2. Preparar o SQL para inserir o item
             String sql = "INSERT INTO itens (id, nome, descricao, preco_venda, preco_custo, unidade_medida, " +
                     "quantidade_estoque, quantidade_minima, quantidade_atual, " +
-                    "categoria_id, embalagem_primaria_id, embalagem_secundaria_id, etiqueta_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "categoria_id " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql);
 
             // 3. Definir os valores dos parâmetros
@@ -58,24 +55,6 @@ public class ItemDAOImpl implements ItemDAO {
                 stmt.setInt(10, categoria.getId());
             } else {
                 stmt.setNull(10, Types.INTEGER);
-            }
-
-            if (embalagemPrimaria != null) {
-                stmt.setInt(11, embalagemPrimaria.getId());
-            } else {
-                stmt.setNull(11, Types.INTEGER);
-            }
-
-            if (embalagemSecundaria != null) {
-                stmt.setInt(12, embalagemSecundaria.getId());
-            } else {
-                stmt.setNull(12, Types.INTEGER);
-            }
-
-            if (etiqueta != null) {
-                stmt.setInt(13, etiqueta.getId());
-            } else {
-                stmt.setNull(13, Types.INTEGER);
             }
 
             // 4. Executar a inserção
@@ -129,14 +108,8 @@ public class ItemDAOImpl implements ItemDAO {
             String sql = """
                     SELECT i.*,
                            c.nome as categoria_nome, c.descricao as categoria_descricao, c.tipo as categoria_tipo,
-                           ep.nome as embalagem_primaria_nome, ep.descricao as embalagem_primaria_descricao, ep.tipo as embalagem_primaria_tipo,
-                           es.nome as embalagem_secundaria_nome, es.descricao as embalagem_secundaria_descricao, es.tipo as embalagem_secundaria_tipo,
-                           et.nome as etiqueta_nome, et.descricao as etiqueta_descricao, et.tipo as etiqueta_tipo
                     FROM itens i
                     LEFT JOIN categorias c ON i.categoria_id = c.id
-                    LEFT JOIN categorias ep ON i.embalagem_primaria_id = ep.id
-                    LEFT JOIN categorias es ON i.embalagem_secundaria_id = es.id
-                    LEFT JOIN categorias et ON i.etiqueta_id = et.id
                     WHERE i.id = ?
                     """;
             stmt = conn.prepareStatement(sql);
@@ -168,14 +141,8 @@ public class ItemDAOImpl implements ItemDAO {
             String sql = """
                     SELECT i.*,
                            c.nome as categoria_nome, c.descricao as categoria_descricao, c.tipo as categoria_tipo,
-                           ep.nome as embalagem_primaria_nome, ep.descricao as embalagem_primaria_descricao, ep.tipo as embalagem_primaria_tipo,
-                           es.nome as embalagem_secundaria_nome, es.descricao as embalagem_secundaria_descricao, es.tipo as embalagem_secundaria_tipo,
-                           et.nome as etiqueta_nome, et.descricao as etiqueta_descricao, et.tipo as etiqueta_tipo
                     FROM itens i
                     LEFT JOIN categorias c ON i.categoria_id = c.id
-                    LEFT JOIN categorias ep ON i.embalagem_primaria_id = ep.id
-                    LEFT JOIN categorias es ON i.embalagem_secundaria_id = es.id
-                    LEFT JOIN categorias et ON i.etiqueta_id = et.id
                     """;
             stmt = conn.prepareStatement(sql);
             rs = stmt.executeQuery();
@@ -205,14 +172,8 @@ public class ItemDAOImpl implements ItemDAO {
             String sql = """
                     SELECT i.*,
                            c.nome as categoria_nome, c.descricao as categoria_descricao, c.tipo as categoria_tipo,
-                           ep.nome as embalagem_primaria_nome, ep.descricao as embalagem_primaria_descricao, ep.tipo as embalagem_primaria_tipo,
-                           es.nome as embalagem_secundaria_nome, es.descricao as embalagem_secundaria_descricao, es.tipo as embalagem_secundaria_tipo,
-                           et.nome as etiqueta_nome, et.descricao as etiqueta_descricao, et.tipo as etiqueta_tipo
                     FROM itens i
                     LEFT JOIN categorias c ON i.categoria_id = c.id
-                    LEFT JOIN categorias ep ON i.embalagem_primaria_id = ep.id
-                    LEFT JOIN categorias es ON i.embalagem_secundaria_id = es.id
-                    LEFT JOIN categorias et ON i.etiqueta_id = et.id
                     WHERE i.quantidade_atual < i.quantidade_minima
                     ORDER BY i.nome
                     """;
@@ -266,39 +227,8 @@ public class ItemDAOImpl implements ItemDAO {
             categoria.setId(rs.getInt("categoria_id"));
             categoria.setNome(rs.getString("categoria_nome"));
             categoria.setDescricao(rs.getString("categoria_descricao"));
-            categoria.setTipo(rs.getString("categoria_tipo"));
         }
         item.setCategoria(categoria);
-
-        Categoria embalagemPrimaria = null;
-        if (rs.getString("embalagem_nome") != null) {
-            embalagemPrimaria = new Categoria();
-            embalagemPrimaria.setId(rs.getInt("embalagemPrimaria_id"));
-            embalagemPrimaria.setNome(rs.getString("embalagemPrimaria_nome"));
-            embalagemPrimaria.setDescricao(rs.getString("embalagemPrimaria_descricao"));
-            embalagemPrimaria.setTipo(rs.getString("embalagemPrimaria_tipo"));
-        }
-        item.setEmbalagemPrimaria(embalagemPrimaria);
-
-        Categoria embalagemSecundaria = null;
-        if (rs.getString("embalagem_nome") != null) {
-            embalagemSecundaria = new Categoria();
-            embalagemSecundaria.setId(rs.getInt("embalagemSecundaria_id"));
-            embalagemSecundaria.setNome(rs.getString("embalagemSecundaria_nome"));
-            embalagemSecundaria.setDescricao(rs.getString("embalagemSecundaria_descricao"));
-            embalagemSecundaria.setTipo(rs.getString("embalagemSecundaria_tipo"));
-        }
-        item.setEmbalagemSecundaria(embalagemSecundaria);
-
-        Categoria etiqueta = null;
-        if (rs.getString("etiqueta_nome") != null) {
-            etiqueta = new Categoria();
-            etiqueta.setId(rs.getInt("etiqueta_id"));
-            etiqueta.setNome(rs.getString("etiqueta_nome"));
-            etiqueta.setDescricao(rs.getString("etiqueta_descricao"));
-            etiqueta.setTipo(rs.getString("etiqueta_tipo"));
-        }
-        item.setEtiqueta(etiqueta);
 
         return item;
     }

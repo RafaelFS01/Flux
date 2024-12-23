@@ -26,16 +26,9 @@ public class ItemService {
 
         // Garantir que as categorias existam e obter seus IDs
         Categoria categoria = categoriaDAO.salvarCategoria(item.getCategoria());
-        Categoria embalagemPrimaria = categoriaDAO.salvarCategoria(item.getEmbalagemPrimaria());
-        Categoria embalagemSecundaria = categoriaDAO.salvarCategoria(item.getEmbalagemSecundaria());
-        Categoria etiqueta = categoriaDAO.salvarCategoria(item.getEtiqueta());
 
         // Atualizar o item com as categorias persistidas (com IDs)
         item.setCategoria(categoria);
-        item.setEmbalagemPrimaria(embalagemPrimaria);
-        item.setEmbalagemSecundaria(embalagemSecundaria);
-        item.setEtiqueta(etiqueta);
-
         itemDAO.salvarItem(item);
 
         // Exportar o banco de dados, se necessário
@@ -101,25 +94,9 @@ public class ItemService {
             erros.append("Selecione uma categoria.\n");
         }
 
-        if (item.getEmbalagemPrimaria() == null) {
-            erros.append("Selecione uma embalagem primária.\n");
-        }
-
-        if (item.getEmbalagemSecundaria() == null) {
-            erros.append("Selecione uma embalagem secundária.\n");
-        }
-
-        if (item.getEtiqueta() == null) {
-            erros.append("Selecione uma etiqueta.\n");
-        }
-
         if (erros.length() > 0) {
             throw new Exception(erros.toString());
         }
-    }
-
-    public List<Categoria> buscarCategoriasPorTipo(String tipo) throws Exception {
-        return categoriaDAO.buscarCategoriasPorTipo(tipo);
     }
 
     public boolean verificarItemExistente(String nome) throws Exception {

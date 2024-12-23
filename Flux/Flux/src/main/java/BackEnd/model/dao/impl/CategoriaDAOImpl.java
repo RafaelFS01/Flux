@@ -17,7 +17,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
 
     @Override
     public Categoria salvarCategoria(Categoria categoria) throws Exception {
-        if (categoria == null || categoria.getNome() == null || categoria.getTipo() == null) {
+        if (categoria == null || categoria.getNome() == null) {
             return null; // Ou lançar uma exceção, dependendo da sua lógica
         }
 
@@ -29,10 +29,9 @@ public class CategoriaDAOImpl implements CategoriaDAO {
             conn = ConnectionFactory.getConnection();
 
             // 1. Verificar se a categoria já existe
-            String sql = "SELECT id FROM categorias WHERE nome = ? AND tipo = ?";
+            String sql = "SELECT id FROM categorias WHERE nome = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, categoria.getNome());
-            stmt.setString(2, categoria.getTipo());
             rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -44,11 +43,10 @@ public class CategoriaDAOImpl implements CategoriaDAO {
                 rs.close();
                 stmt.close();
 
-                sql = "INSERT INTO categorias (nome, descricao, tipo) VALUES (?, ?, ?)";
+                sql = "INSERT INTO categorias (nome, descricao) VALUES (?, ?)";
                 stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS); // Para obter o ID gerado
                 stmt.setString(1, categoria.getNome());
                 stmt.setString(2, categoria.getDescricao());
-                stmt.setString(3, categoria.getTipo());
                 stmt.executeUpdate();
 
                 // Obter o ID gerado
@@ -66,17 +64,16 @@ public class CategoriaDAOImpl implements CategoriaDAO {
     }
 
     @Override
-    public Categoria buscarCategoriaPorNomeETipo(String nome, String tipo) throws Exception {
+    public Categoria buscarCategoriaPorNome(String nome) throws Exception {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
             conn = ConnectionFactory.getConnection();
-            String sql = "SELECT * FROM categorias WHERE nome = ? AND tipo = ?";
+            String sql = "SELECT * FROM categorias WHERE nome = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, nome);
-            stmt.setString(2, tipo);
             rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -92,8 +89,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
         }
     }
 
-    @Override
-    public List<Categoria> buscarCategoriasPorTipo(String tipo) throws Exception {
+    public List<Categoria> listarCategorias() throws Exception {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -101,9 +97,8 @@ public class CategoriaDAOImpl implements CategoriaDAO {
 
         try {
             conn = ConnectionFactory.getConnection();
-            String sql = "SELECT * FROM categorias WHERE tipo = ?";
+            String sql = "SELECT * FROM categorias";
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, tipo);
             rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -113,7 +108,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
             return categorias;
 
         } catch (SQLException e) {
-            throw new Exception("Erro ao buscar categorias por tipo: " + e.getMessage());
+            throw new Exception("Erro ao buscar categoria por nome e tipo: " + e.getMessage());
         } finally {
             ConnectionFactory.closeConnection(conn, stmt, rs);
         }
@@ -124,7 +119,6 @@ public class CategoriaDAOImpl implements CategoriaDAO {
         categoria.setId(rs.getInt("id"));
         categoria.setNome(rs.getString("nome"));
         categoria.setDescricao(rs.getString("descricao"));
-        categoria.setTipo(rs.getString("tipo"));
         return categoria;
     }
 }

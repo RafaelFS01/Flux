@@ -82,36 +82,6 @@
                 <Button text="+" onAction="#abrirCadastroCategoria" styleClass="btn-add"
                         GridPane.columnIndex="4" GridPane.rowIndex="2"/>
 
-                <!-- Embalagem Primária-->
-                <Label text="Embalagem Primária:" styleClass="form-label"
-                       GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                <ComboBox fx:id="embalagemPrimariaComboBox" promptText="Selecione a embalagem primária" styleClass="form-combo"
-                          GridPane.columnIndex="3" GridPane.rowIndex="3"/>
-
-                <!-- Botão para adicionar nova embalagem -->
-                <Button text="+" onAction="#abrirCadastroEmbalagemPrimária" styleClass="btn-add"
-                        GridPane.columnIndex="4" GridPane.rowIndex="3"/>
-
-                <!-- Embalagem Secundária -->
-                <Label text="Embalagem Secundária:" styleClass="form-label"
-                       GridPane.columnIndex="2" GridPane.rowIndex="4"/>
-                <ComboBox fx:id="embalagemSecundariaComboBox" promptText="Selecione a embalagem secundária" styleClass="form-combo"
-                          GridPane.columnIndex="3" GridPane.rowIndex="4"/>
-
-                <!-- Botão para adicionar nova embalagem -->
-                <Button text="+" onAction="#abrirCadastroEmbalagemSecundária" styleClass="btn-add"
-                        GridPane.columnIndex="4" GridPane.rowIndex="4"/>
-
-                <!-- Etiqueta -->
-                <Label text="Etiqueta:" styleClass="form-label"
-                       GridPane.columnIndex="2" GridPane.rowIndex="5"/>
-                <ComboBox fx:id="etiquetaComboBox" promptText="Selecione a etiqueta" styleClass="form-combo"
-                          GridPane.columnIndex="3" GridPane.rowIndex="5"/>
-
-                <!-- Botão para adicionar nova etiqueta -->
-                <Button text="+" onAction="#abrirCadastroEtiqueta" styleClass="btn-add"
-                        GridPane.columnIndex="4" GridPane.rowIndex="5"/>
-
             </GridPane>
 
             <!-- Botões -->

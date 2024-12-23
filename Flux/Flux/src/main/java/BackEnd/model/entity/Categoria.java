@@ -6,7 +6,6 @@ public class Categoria {
     private Integer id;
     private String nome;
     private String descricao;
-    private String tipo; // "Geral", "Embalagem", "Etiqueta"
 
     // Getters e Setters
 
@@ -32,14 +31,6 @@ public class Categoria {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
     }
 
     @Override

@@ -32,13 +32,6 @@
             <TextField fx:id="descricaoField" promptText="Digite a descrição"
                        styleClass="form-field"
                        GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-            <!-- Tipo -->
-            <Label text="Tipo:" styleClass="form-label"
-                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="tipoField" editable="true"
-                       styleClass="form-field-disabled"
-                       GridPane.columnIndex="1" GridPane.rowIndex="2"/>
         </GridPane>
 
         <!-- Botões -->
