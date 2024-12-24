@@ -108,8 +108,8 @@
                            visible="false" managed="false" editable="false"
                            GridPane.columnIndex="3" GridPane.rowIndex="6"/>
 
-                <Button text="Adicionar Dependência 1" onAction="#abrirAdicionarDependencia1"
-                        styleClass="btn-add"
+                <Button fx:id="adicionarDependencia1Button" text="Adicionar Dependência 1" onAction="#abrirAdicionarDependencia1"
+                        visible="false" managed="false" styleClass="btn-add"
                         GridPane.columnIndex="2" GridPane.rowIndex="3"/>
                 <Button fx:id="adicionarDependencia2Button" text="Adicionar Dependência 2" onAction="#abrirAdicionarDependencia2"
                         visible="false" managed="false" styleClass="btn-add"
@@ -128,7 +128,9 @@
                 <padding>
                     <Insets top="20"/>
                 </padding>
-                <Button text="Salvar" onAction="#salvarItem" styleClass="btn-primary"/>
+                <Button fx:id="salvarItem" text="Salvar" onAction="#salvarItem" styleClass="btn-primary"/>
+                <Button fx:id="salvarDependencia" text="Finalizar" onAction="#salvarDependencia" styleClass="btn-primary"
+                        visible="false" managed="false"/>
                 <Button text="Limpar" onAction="#limparCampos" styleClass="btn-secondary"/>
             </HBox>
         </VBox>

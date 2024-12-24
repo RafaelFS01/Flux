@@ -23,10 +23,9 @@ public class AlertHelper {
     }
 
     public static Optional<ButtonType> showConfirmation(String title, String header, String content) {
-        Alert alert = new Alert(AlertType.CONFIRMATION);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, content, ButtonType.YES, ButtonType.NO); // Use YES e NO
         alert.setTitle(title);
         alert.setHeaderText(header);
-        alert.setContentText(content);
         return alert.showAndWait();
     }
 
