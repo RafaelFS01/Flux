@@ -18,6 +18,7 @@ import javafx.util.StringConverter;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class AdicionarDependenciaController implements Initializable {
 
@@ -30,6 +31,11 @@ public class AdicionarDependenciaController implements Initializable {
     private final ItemService itemService;
 
     private int idItemDependente;
+    private Consumer<Item> onDependenciaSalva;
+
+    public void setOnDependenciaSalva(Consumer<Item> onDependenciaSalva) {
+        this.onDependenciaSalva = onDependenciaSalva;
+    }
 
     // Método para definir o ID do item dependente
     public void setIdItemDependente(int idItemDependente) {
@@ -134,6 +140,11 @@ public class AdicionarDependenciaController implements Initializable {
 
             // Salvar a dependência usando o serviço
             dependenciaService.salvarDependencia(dependencia);
+
+            // Executar a ação especificada pelo CadastrarItemController
+            if (onDependenciaSalva != null) {
+                onDependenciaSalva.accept(itemSelecionado);
+            }
 
             // Feedback de sucesso
             AlertHelper.showSuccess("Dependência salva com sucesso!");

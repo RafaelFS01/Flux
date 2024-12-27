@@ -20,9 +20,9 @@ descricao TEXT,
 preco_venda DECIMAL(10, 2) NOT NULL,
 preco_custo DECIMAL(10, 2) NOT NULL,
 unidade_medida VARCHAR(50) NOT NULL,
-quantidade_estoque INT NOT NULL,
-quantidade_minima INT NOT NULL,
-quantidade_atual INT NOT NULL DEFAULT 0,
+quantidade_estoque DECIMAL(10, 5) NOT NULL,
+quantidade_minima DECIMAL(10, 5) NOT NULL,
+quantidade_atual DECIMAL(10, 5) NOT NULL DEFAULT 0,
 categoria_id INT,
 FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );

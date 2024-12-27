@@ -150,10 +150,21 @@ public class CadastrarItemController implements Initializable {
             );
 
             if (result.isPresent() && result.get() == ButtonType.YES) { // Compare com YES agora
+                //Fazer os campos de cadastro do produto ficarem bloqueados
+                idField.setDisable(true);
+                nomeField.setDisable(true);
+                descricaoField.setDisable(true);
+                precoVendaField.setDisable(true);
+                precoCustoField.setDisable(true);
+                unidadeMedidaField.setDisable(true);
+                quantidadeEstoqueField.setDisable(true);
+                quantidadeMinimaField.setDisable(true);
+                categoriaComboBox.setDisable(true);
                 // Ação a ser executada se o usuário clicar em "Sim"
                 abrirAdicionarDependencia1(event);
                 salvarDependencia.managedProperty().setValue(true);
                 salvarDependencia.visibleProperty().setValue(true);
+
             } else {
                 // Ação a ser executada se o usuário clicar em "Não" (ou fechar a janela)
                 limparCampos();
@@ -202,6 +213,16 @@ public class CadastrarItemController implements Initializable {
         quantidadeEstoqueField.clear();
         quantidadeMinimaField.clear();
         categoriaComboBox.getSelectionModel().clearSelection();
+        //Fazer os campos de cadastro do produto desbloquearem.
+        idField.setDisable(false);
+        nomeField.setDisable(false);
+        descricaoField.setDisable(false);
+        precoVendaField.setDisable(false);
+        precoCustoField.setDisable(false);
+        unidadeMedidaField.setDisable(false);
+        quantidadeEstoqueField.setDisable(false);
+        quantidadeMinimaField.setDisable(false);
+        categoriaComboBox.setDisable(false);
     }
 
     private void configurarBind(){
@@ -241,7 +262,7 @@ public class CadastrarItemController implements Initializable {
     }
 
     @FXML
-    private void abrirCadastroCategoria(ActionEvent event) {
+    private void abrirCadastroCategoria(ActionEvent event)      {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CadastrarCategoria.fxml"));
             Parent root = loader.load();
@@ -274,22 +295,17 @@ public class CadastrarItemController implements Initializable {
             int idItemDependente = Integer.parseInt(idField.getText().trim()); // Obtenha o ID do campo idField
             controller.setIdItemDependente(idItemDependente);
 
+            // Passar uma expressão lambda que define a ação a ser executada quando a dependência for salva
+            controller.setOnDependenciaSalva(item -> {
+                dependencia1Field.setText(item.getNome());
+            });
+
             Stage stage = new Stage();
             stage.setTitle("Adicionar Dependência");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/icon.png")));
             stage.showAndWait();
-            //Fazer os campos de cadastro do produto ficarem bloqueados
-            idField.editableProperty().setValue(false);
-            nomeField.editableProperty().setValue(false);
-            descricaoField.editableProperty().setValue(false);
-            precoVendaField.editableProperty().setValue(false);
-            precoCustoField.editableProperty().setValue(false);
-            unidadeMedidaField.editableProperty().setValue(false);
-            quantidadeEstoqueField.editableProperty().setValue(false);
-            quantidadeMinimaField.editableProperty().setValue(false);
-            categoriaComboBox.editableProperty().setValue(false);
             // Fazer os campos e botão aparecerem
             dependencia1Field.visibleProperty().setValue(true);
             dependencia1Field.managedProperty().setValue(true);
@@ -317,6 +333,11 @@ public class CadastrarItemController implements Initializable {
             // Passe o ID do item dependente para o controller da janela AdicionarDependencia
             int idItemDependente = Integer.parseInt(idField.getText().trim()); // Obtenha o ID do campo idField
             controller.setIdItemDependente(idItemDependente);
+
+            // Passar uma expressão lambda que define a ação a ser executada quando a dependência for salva
+            controller.setOnDependenciaSalva(item -> {
+                dependencia2Field.setText(item.getNome());
+            });
 
             Stage stage = new Stage();
             stage.setTitle("Adicionar Dependência");
@@ -351,6 +372,11 @@ public class CadastrarItemController implements Initializable {
             int idItemDependente = Integer.parseInt(idField.getText().trim()); // Obtenha o ID do campo idField
             controller.setIdItemDependente(idItemDependente);
 
+            // Passar uma expressão lambda que define a ação a ser executada quando a dependência for salva
+            controller.setOnDependenciaSalva(item -> {
+                dependencia3Field.setText(item.getNome());
+            });
+
             Stage stage = new Stage();
             stage.setTitle("Adicionar Dependência");
             stage.setScene(new Scene(root));
@@ -383,6 +409,11 @@ public class CadastrarItemController implements Initializable {
             // Passe o ID do item dependente para o controller da janela AdicionarDependencia
             int idItemDependente = Integer.parseInt(idField.getText().trim()); // Obtenha o ID do campo idField
             controller.setIdItemDependente(idItemDependente);
+
+            // Passar uma expressão lambda que define a ação a ser executada quando a dependência for salva
+            controller.setOnDependenciaSalva(item -> {
+                dependencia4Field.setText(item.getNome());
+            });
 
             Stage stage = new Stage();
             stage.setTitle("Adicionar Dependência");
