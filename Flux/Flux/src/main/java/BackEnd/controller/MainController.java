@@ -53,6 +53,11 @@ public class MainController {
     }
 
     @FXML
+    private void mostrarLancarItem() {
+        carregarFXML("/fxml/LançarItemEstoque.fxml");
+    }
+
+    @FXML
     private void mostrarListaEquipamentos() {
         carregarFXML("/fxml/ListarEquipamentos.fxml");
     }

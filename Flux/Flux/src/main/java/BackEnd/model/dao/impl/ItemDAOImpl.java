@@ -22,148 +22,126 @@ public class ItemDAOImpl implements ItemDAO {
 
     @Override
     public void salvarItem(Item item) throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
+        String sql = "INSERT INTO itens (id, nome, descricao, preco_venda, preco_custo, unidade_medida, " +
+                "quantidade_estoque, quantidade_minima, quantidade_atual, " +
+                "categoria_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        try {
-            conn = ConnectionFactory.getConnection();
-            conn.setAutoCommit(false); // Inicia a transação
+            conn.setAutoCommit(false); // Inicia transação
 
-            // 1. Garantir que as categorias existam e obter seus IDs
-            Categoria categoria = categoriaDAO.salvarCategoria(item.getCategoria());
-
-            // 2. Preparar o SQL para inserir o item
-            String sql = "INSERT INTO itens (id, nome, descricao, preco_venda, preco_custo, unidade_medida, " +
-                    "quantidade_estoque, quantidade_minima, quantidade_atual, " +
-                    "categoria_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql);
-
-            // 3. Definir os valores dos parâmetros
             stmt.setInt(1, item.getId());
             stmt.setString(2, item.getNome());
             stmt.setString(3, item.getDescricao());
             stmt.setDouble(4, item.getPrecoVenda());
             stmt.setDouble(5, item.getPrecoCusto());
             stmt.setString(6, item.getUnidadeMedida());
-            stmt.setInt(7, item.getQuantidadeEstoque());
-            stmt.setInt(8, item.getQuantidadeMinima());
-            stmt.setInt(9, item.getQuantidadeAtual());
-            stmt.setInt(10, categoria.getId());
+            stmt.setDouble(7, item.getQuantidadeEstoque());
+            stmt.setDouble(8, item.getQuantidadeMinima());
+            stmt.setDouble(9, item.getQuantidadeAtual());
+            stmt.setInt(10, item.getCategoria().getId());
 
-
-            // 4. Executar a inserção
             stmt.executeUpdate();
-            conn.commit(); // Finaliza a transação com sucesso
+            conn.commit();
 
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback(); // Desfaz a transação em caso de erro
-                } catch (SQLException ex) {
-                    throw new Exception("Erro ao fazer rollback: " + ex.getMessage());
-                }
-            }
             throw new Exception("Erro ao salvar item: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt);
+        }
+    }
+
+    @Override
+    public void atualizar(Item item) throws Exception {
+        String sql = "UPDATE itens SET nome = ?, descricao = ?, preco_venda = ?, preco_custo = ?, unidade_medida = ?, quantidade_estoque = ?, quantidade_minima = ?, quantidade_atual = ?, categoria_id = ? WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, item.getNome());
+            stmt.setString(2, item.getDescricao());
+            stmt.setDouble(3, item.getPrecoVenda());
+            stmt.setDouble(4, item.getPrecoCusto());
+            stmt.setString(5, item.getUnidadeMedida());
+            stmt.setDouble(6, item.getQuantidadeEstoque());
+            stmt.setDouble(7, item.getQuantidadeMinima());
+            stmt.setDouble(8, item.getQuantidadeAtual());
+            stmt.setInt(9, item.getCategoria().getId());
+            stmt.setInt(10, item.getId());
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new Exception("Erro ao atualizar item: " + e.getMessage());
         }
     }
 
     @Override
     public boolean buscarItemPorNome(String nome) throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        String sql = "SELECT 1 FROM itens WHERE nome = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        try {
-            conn = ConnectionFactory.getConnection();
-            String sql = "SELECT 1 FROM itens WHERE nome = ?";
-            stmt = conn.prepareStatement(sql);
             stmt.setString(1, nome);
-            rs = stmt.executeQuery();
-
-            return rs.next(); // Retorna true se encontrar algum resultado, false caso contrário
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
 
         } catch (SQLException e) {
             throw new Exception("Erro ao buscar item por nome: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt, rs);
         }
     }
 
     @Override
     public Item buscarItemPorId(int id) throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        String sql = "SELECT i.*, c.nome as categoria_nome, c.descricao as categoria_descricao " +
+                "FROM itens i " +
+                "LEFT JOIN categorias c ON i.categoria_id = c.id " +
+                "WHERE i.id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        try {
-            conn = ConnectionFactory.getConnection();
-            String sql = """
-                    SELECT i.*,
-                           c.nome as categoria_nome, c.descricao as categoria_descricao, c.tipo as categoria_tipo,
-                    FROM itens i
-                    LEFT JOIN categorias c ON i.categoria_id = c.id
-                    WHERE i.id = ?
-                    """;
-            stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return mapearResultSetParaItem(rs);
-            } else {
-                return null; // Item não encontrado
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearResultSetParaItem(rs);
+                } else {
+                    return null;
+                }
             }
 
         } catch (SQLException e) {
             throw new Exception("Erro ao buscar item por ID: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt, rs);
         }
     }
 
     @Override
     public List<Item> listarItens() throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         List<Item> itens = new ArrayList<>();
-
-        try {
-            conn = ConnectionFactory.getConnection();
-            String sql = """
-                    SELECT i.*,
-                           c.nome as categoria_nome, c.descricao as categoria_descricao
-                    FROM itens i
-                    LEFT JOIN categorias c ON i.categoria_id = c.id
-                    """;
-            stmt = conn.prepareStatement(sql);
-            rs = stmt.executeQuery();
+        String sql = "SELECT i.*, c.nome as categoria_nome, c.descricao as categoria_descricao " +
+                "FROM itens i " +
+                "LEFT JOIN categorias c ON i.categoria_id = c.id";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 itens.add(mapearResultSetParaItem(rs));
             }
-
             return itens;
 
         } catch (SQLException e) {
             throw new Exception("Erro ao listar itens: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt, rs);
         }
     }
 
     @Override
-    public List<Item> listarItensPorCategoria(int idCategoria) {
+    public List<Item> listarItensPorCategoria(int idCategoria) throws Exception {
         List<Item> itens = new ArrayList<>();
         String sql = "SELECT i.*, c.nome AS categoria_nome, c.descricao AS categoria_descricao " +
                 "FROM itens i " +
                 "LEFT JOIN categorias c ON i.categoria_id = c.id " +
                 "WHERE i.categoria_id = ?";
-        try (Connection connection = ConnectionFactory.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, idCategoria);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -172,58 +150,46 @@ public class ItemDAOImpl implements ItemDAO {
                     itens.add(item);
                 }
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
-            // Tratar a exceção apropriadamente
+            throw new Exception("Erro ao listar itens por categoria: " + e.getMessage());
         }
         return itens;
     }
 
     @Override
     public List<Item> listarItensAbaixoDoMinimo() throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         List<Item> itens = new ArrayList<>();
-
-        try {
-            conn = ConnectionFactory.getConnection();
-            String sql = """
-                    SELECT i.*,
-                           c.nome as categoria_nome, c.descricao as categoria_descricao, c.tipo as categoria_tipo,
-                    FROM itens i
-                    LEFT JOIN categorias c ON i.categoria_id = c.id
-                    WHERE i.quantidade_atual < i.quantidade_minima
-                    ORDER BY i.nome
-                    """;
-            stmt = conn.prepareStatement(sql);
-            rs = stmt.executeQuery();
+        String sql = "SELECT i.*, c.nome as categoria_nome, c.descricao as categoria_descricao " +
+                "FROM itens i " +
+                "LEFT JOIN categorias c ON i.categoria_id = c.id " +
+                "WHERE i.quantidade_atual < i.quantidade_minima " +
+                "ORDER BY i.nome";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 itens.add(mapearResultSetParaItem(rs));
             }
-
             return itens;
+
         } catch (SQLException e) {
             throw new Exception("Erro ao listar itens abaixo do mínimo: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt, rs);
         }
     }
 
     @Override
     public void deletar(int id) throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
+        String sql = "DELETE FROM itens WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        try {
-            conn = ConnectionFactory.getConnection();
-            String sql = "DELETE FROM equipamentos WHERE id = ?";
-            stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             stmt.executeUpdate();
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt);
+
+        } catch (SQLException e) {
+            throw new Exception("Erro ao deletar item: " + e.getMessage());
         }
     }
 
@@ -235,18 +201,14 @@ public class ItemDAOImpl implements ItemDAO {
         item.setPrecoVenda(rs.getDouble("preco_venda"));
         item.setPrecoCusto(rs.getDouble("preco_custo"));
         item.setUnidadeMedida(rs.getString("unidade_medida"));
-        item.setQuantidadeEstoque(rs.getInt("quantidade_estoque"));
-        item.setQuantidadeMinima(rs.getInt("quantidade_minima"));
-        item.setQuantidadeAtual(rs.getInt("quantidade_atual"));
+        item.setQuantidadeEstoque(rs.getDouble("quantidade_estoque"));
+        item.setQuantidadeMinima(rs.getDouble("quantidade_minima"));
+        item.setQuantidadeAtual(rs.getDouble("quantidade_atual"));
 
-        // Mapeia as categorias, se existirem
-        Categoria categoria = null;
-        if (rs.getString("categoria_nome") != null) {
-            categoria = new Categoria();
-            categoria.setId(rs.getInt("categoria_id"));
-            categoria.setNome(rs.getString("categoria_nome"));
-            categoria.setDescricao(rs.getString("categoria_descricao"));
-        }
+        Categoria categoria = new Categoria();
+        categoria.setId(rs.getInt("categoria_id"));
+        categoria.setNome(rs.getString("categoria_nome"));
+        categoria.setDescricao(rs.getString("categoria_descricao"));
         item.setCategoria(categoria);
 
         return item;

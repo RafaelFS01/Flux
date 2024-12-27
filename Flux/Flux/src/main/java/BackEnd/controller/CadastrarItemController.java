@@ -184,9 +184,9 @@ public class CadastrarItemController implements Initializable {
         item.setPrecoVenda(Double.parseDouble(precoVendaField.getText()));
         item.setPrecoCusto(Double.parseDouble(precoCustoField.getText()));
         item.setUnidadeMedida(unidadeMedidaField.getText().trim());
-        item.setQuantidadeEstoque(Integer.parseInt(quantidadeEstoqueField.getText()));
-        item.setQuantidadeMinima(Integer.parseInt(quantidadeMinimaField.getText()));
-        item.setQuantidadeAtual(Integer.parseInt(quantidadeEstoqueField.getText()));
+        item.setQuantidadeEstoque(Double.parseDouble(quantidadeEstoqueField.getText()));
+        item.setQuantidadeMinima(Double.parseDouble(quantidadeMinimaField.getText()));
+        item.setQuantidadeAtual(Double.parseDouble(quantidadeEstoqueField.getText()));
         item.setCategoria(categoriaComboBox.getValue());
         return item;
     }

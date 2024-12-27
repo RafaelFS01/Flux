@@ -11,7 +11,7 @@ public class CategoriaService {
 
     private final CategoriaDAO categoriaDAO;
 
-    public CategoriaService(){
+    public CategoriaService() {
         this.categoriaDAO = new CategoriaDAOImpl();
     }
 

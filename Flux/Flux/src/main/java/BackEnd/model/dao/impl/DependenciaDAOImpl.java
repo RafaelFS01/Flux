@@ -15,7 +15,7 @@ import java.util.List;
 public class DependenciaDAOImpl implements DependenciaDAO {
 
     @Override
-    public void salvarDependencia(Dependencia dependencia) {
+    public void salvarDependencia(Dependencia dependencia) throws Exception {
         String sql = "INSERT INTO Dependencias (id_item_dependente, id_item_necessario, id_categoria, quantidade) VALUES (?, ?, ?, ?)";
         try (Connection connection = ConnectionFactory.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -28,14 +28,12 @@ public class DependenciaDAOImpl implements DependenciaDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            AlertHelper.showError("ERRO EM SALVAR", e.getMessage());
-            e.printStackTrace();
-            // Tratar a exceção apropriadamente (lançar uma exceção personalizada, logar o erro, etc.)
+            throw new Exception("Erro ao salvar dependência: " + e.getMessage());
         }
     }
 
     @Override
-    public Dependencia buscarPorId(int id) {
+    public Dependencia buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM Dependencias WHERE id = ?";
         try (Connection connection = ConnectionFactory.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -46,15 +44,13 @@ public class DependenciaDAOImpl implements DependenciaDAO {
                     return mapearResultSetParaDependencia(rs);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Tratar a exceção apropriadamente
+
         }
         return null;
     }
 
     @Override
-    public List<Dependencia> buscarPorIdItemDependente(int idItemDependente) {
+    public List<Dependencia> buscarPorIdItemDependente(int idItemDependente) throws SQLException {
         List<Dependencia> dependencias = new ArrayList<>();
         String sql = "SELECT * FROM Dependencias WHERE id_item_dependente = ?";
         try (Connection connection = ConnectionFactory.getConnection();
@@ -66,15 +62,13 @@ public class DependenciaDAOImpl implements DependenciaDAO {
                     dependencias.add(mapearResultSetParaDependencia(rs));
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Tratar a exceção apropriadamente
+
         }
         return dependencias;
     }
 
     @Override
-    public void atualizar(Dependencia dependencia) {
+    public void atualizar(Dependencia dependencia) throws Exception {
         String sql = "UPDATE Dependencias SET id_item_dependente = ?, id_item_necessario = ?, id_categoria = ?, quantidade = ? WHERE id = ?";
         try (Connection connection = ConnectionFactory.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -88,13 +82,12 @@ public class DependenciaDAOImpl implements DependenciaDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            // Tratar a exceção apropriadamente
+            throw new Exception("Erro ao atualizar dependência: " + e.getMessage());
         }
     }
 
     @Override
-    public void excluir(int id) {
+    public void excluir(int id) throws SQLException {
         String sql = "DELETE FROM Dependencias WHERE id = ?";
         try (Connection connection = ConnectionFactory.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -102,9 +95,6 @@ public class DependenciaDAOImpl implements DependenciaDAO {
             stmt.setInt(1, id);
             stmt.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Tratar a exceção apropriadamente
         }
     }
 

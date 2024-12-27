@@ -9,9 +9,9 @@ public class Item {
     private Double precoVenda;
     private Double precoCusto;
     private String unidadeMedida;
-    private Integer quantidadeEstoque;
-    private Integer quantidadeMinima;
-    private Integer quantidadeAtual;
+    private Double quantidadeEstoque;
+    private Double quantidadeMinima;
+    private Double quantidadeAtual;
     private Categoria categoria; // Categoria principal
 
     // Getters e Setters
@@ -64,28 +64,28 @@ public class Item {
         this.unidadeMedida = unidadeMedida;
     }
 
-    public Integer getQuantidadeEstoque() {
-        return quantidadeEstoque;
-    }
-
-    public void setQuantidadeEstoque(Integer quantidadeEstoque) {
-        this.quantidadeEstoque = quantidadeEstoque;
-    }
-
-    public Integer getQuantidadeMinima() {
-        return quantidadeMinima;
-    }
-
-    public void setQuantidadeMinima(Integer quantidadeMinima) {
-        this.quantidadeMinima = quantidadeMinima;
-    }
-
-    public Integer getQuantidadeAtual() {
+    public Double getQuantidadeAtual() {
         return quantidadeAtual;
     }
 
-    public void setQuantidadeAtual(Integer quantidadeAtual) {
+    public void setQuantidadeAtual(Double quantidadeAtual) {
         this.quantidadeAtual = quantidadeAtual;
+    }
+
+    public Double getQuantidadeEstoque() {
+        return quantidadeEstoque;
+    }
+
+    public void setQuantidadeEstoque(Double quantidadeEstoque) {
+        this.quantidadeEstoque = quantidadeEstoque;
+    }
+
+    public Double getQuantidadeMinima() {
+        return quantidadeMinima;
+    }
+
+    public void setQuantidadeMinima(Double quantidadeMinima) {
+        this.quantidadeMinima = quantidadeMinima;
     }
 
     public Categoria getCategoria() {

@@ -1,5 +1,6 @@
 package BackEnd.controller;
 
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -24,9 +25,9 @@ public class ListarItensController implements Initializable {
     @FXML private TableView<Item> tabelaEquipamentos;
     @FXML private TableColumn<Item, String> colunaId;
     @FXML private TableColumn<Item, String> colunaDescricao;
-    @FXML private TableColumn<Item, Integer> colunaQuantidadeAtual;
-    @FXML private TableColumn<Item, Integer> colunaQuantidadeEstoque;
-    @FXML private TableColumn<Item, Integer> colunaQuantidadeMinima;
+    @FXML private TableColumn<Item, Double> colunaQuantidadeAtual;
+    @FXML private TableColumn<Item, Double> colunaQuantidadeEstoque;
+    @FXML private TableColumn<Item, Double> colunaQuantidadeMinima;
     @FXML private TableColumn<Item, String> colunaTipo;
     @FXML private TableColumn<Item, String> colunaStatus;
     @FXML private TableColumn<Item, Void> colunaAcoes;
@@ -76,19 +77,16 @@ public class ListarItensController implements Initializable {
                 new javafx.beans.property.SimpleStringProperty(data.getValue().getDescricao()));
 
         colunaQuantidadeAtual.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleIntegerProperty(
-                        data.getValue().getQuantidadeAtual()
-                ).asObject());
+                new SimpleDoubleProperty(data.getValue().getQuantidadeAtual()).asObject()
+        );
 
         colunaQuantidadeEstoque.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleIntegerProperty(
-                        data.getValue().getQuantidadeEstoque()
-                ).asObject());
+                new SimpleDoubleProperty(data.getValue().getQuantidadeEstoque()).asObject()
+        );
 
         colunaQuantidadeMinima.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleIntegerProperty(
-                        data.getValue().getQuantidadeMinima()
-                ).asObject());
+                new SimpleDoubleProperty(data.getValue().getQuantidadeMinima()).asObject()
+        );
 
 
         colunaStatus.setCellValueFactory(data -> {

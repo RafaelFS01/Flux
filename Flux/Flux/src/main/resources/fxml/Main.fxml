@@ -36,6 +36,8 @@
                 <Label fx:id="labelEquipamentos" styleClass="menu-section" text="EQUIPAMENTOS" />
                 <Button fx:id="btnRegistrarEquip" onAction="#mostrarRegistroEquipamento" styleClass="menu-button"
                         text="📦 Registrar Equipamento" />
+                <Button fx:id="btnLancarItem" onAction="#mostrarLancarItem" styleClass="menu-button"
+                        text="📦 Lançar Item" />
                 <Button fx:id="btnListarEquip" onAction="#mostrarListaEquipamentos" styleClass="menu-button"
                         text="📋 Listar Equipamentos" />
 

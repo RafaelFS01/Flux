@@ -6,19 +6,54 @@ import BackEnd.model.dao.interfaces.CategoriaDAO;
 import BackEnd.model.dao.interfaces.ItemDAO;
 import BackEnd.model.entity.Categoria;
 import BackEnd.model.entity.Item;
-import BackEnd.util.ConnectionFactory;
 import BackEnd.util.ValidationHelper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ItemService {
 
     private final ItemDAO itemDAO;
     private final CategoriaDAO categoriaDAO;
+    private final DependenciaService dependenciaService;
 
     public ItemService() {
         this.itemDAO = new ItemDAOImpl();
         this.categoriaDAO = new CategoriaDAOImpl();
+        this.dependenciaService = new DependenciaService();
+    }
+    public List<Item> listarItensPorCategoria(int idCategoria) throws Exception {
+        return itemDAO.listarItensPorCategoria(idCategoria);
+    }
+
+    // Outros métodos da classe...
+
+    public List<String> lancarItensNoEstoqueComDependencias(Map<Integer, Double> itemQuantidadeMap) throws Exception {
+        List<String> erros = new ArrayList<>();
+
+        // Etapa 1: Atualizar a quantidade em estoque dos itens lançados
+        for (Map.Entry<Integer, Double> entry : itemQuantidadeMap.entrySet()) {
+            int itemId = entry.getKey();
+            Double quantidade = entry.getValue();
+            Item item = itemDAO.buscarItemPorId(itemId);
+            if (item == null) {
+                erros.add("Item com ID " + itemId + " não encontrado.");
+                continue;
+            }
+            item.setQuantidadeEstoque(item.getQuantidadeEstoque() + quantidade);
+            item.setQuantidadeAtual(item.getQuantidadeAtual() + quantidade);
+            itemDAO.atualizar(item);
+        }
+
+        // Etapa 2: Atualizar as dependências
+        for (Map.Entry<Integer, Double> entry : itemQuantidadeMap.entrySet()) {
+            int itemId = entry.getKey();
+            Double quantidade = entry.getValue();
+            erros.addAll(dependenciaService.atualizarEstoqueItensDependentes(itemId, quantidade));
+        }
+
+        return erros;
     }
 
     public void salvarItem(Item item) throws Exception {
@@ -32,7 +67,8 @@ public class ItemService {
         itemDAO.salvarItem(item);
 
         // Exportar o banco de dados, se necessário
-        ConnectionFactory.exportarBancoDeDados("backup_database.sql");
+        // Comentado, pois não é feito pelo service
+        // ConnectionFactory.exportarBancoDeDados("backup_database.sql");
     }
 
     private void validarItem(Item item) throws Exception {
@@ -106,10 +142,6 @@ public class ItemService {
     // Adicione outros métodos conforme necessário, como:
     public Item buscarItemPorId(int id) throws Exception {
         return itemDAO.buscarItemPorId(id);
-    }
-
-    public List<Item> listarItensPorCategoria(int idCategoria) throws Exception {
-        return itemDAO.listarItensPorCategoria(idCategoria);
     }
 
     public List<Item> listarItens() throws Exception {

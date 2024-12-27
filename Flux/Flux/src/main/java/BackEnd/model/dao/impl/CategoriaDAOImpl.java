@@ -18,99 +18,80 @@ public class CategoriaDAOImpl implements CategoriaDAO {
     @Override
     public Categoria salvarCategoria(Categoria categoria) throws Exception {
         if (categoria == null || categoria.getNome() == null) {
-            return null; // Ou lançar uma exceção, dependendo da sua lógica
+            throw new IllegalArgumentException("Categoria inválida.");
         }
 
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        String sqlBuscar = "SELECT id FROM categorias WHERE nome = ?";
+        String sqlInserir = "INSERT INTO categorias (nome, descricao) VALUES (?, ?)";
 
-        try {
-            conn = ConnectionFactory.getConnection();
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmtBuscar = conn.prepareStatement(sqlBuscar);
+             PreparedStatement stmtInserir = conn.prepareStatement(sqlInserir, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             // 1. Verificar se a categoria já existe
-            String sql = "SELECT id FROM categorias WHERE nome = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, categoria.getNome());
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                // Categoria já existe, retornar a categoria existente
-                categoria.setId(rs.getInt("id"));
-                return categoria;
-            } else {
-                // Categoria não existe, inserir e retornar a nova categoria
-                rs.close();
-                stmt.close();
-
-                sql = "INSERT INTO categorias (nome, descricao) VALUES (?, ?)";
-                stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS); // Para obter o ID gerado
-                stmt.setString(1, categoria.getNome());
-                stmt.setString(2, categoria.getDescricao());
-                stmt.executeUpdate();
-
-                // Obter o ID gerado
-                rs = stmt.getGeneratedKeys();
+            stmtBuscar.setString(1, categoria.getNome());
+            try (ResultSet rs = stmtBuscar.executeQuery()) {
                 if (rs.next()) {
-                    categoria.setId(rs.getInt(1));
+                    // Categoria já existe, retornar a categoria existente
+                    categoria.setId(rs.getInt("id"));
+                    return categoria;
                 }
-                return categoria;
             }
+
+            // 2. Categoria não existe, inserir e retornar a nova categoria
+            stmtInserir.setString(1, categoria.getNome());
+            stmtInserir.setString(2, categoria.getDescricao());
+            stmtInserir.executeUpdate();
+
+            // Obter o ID gerado
+            try (ResultSet generatedKeys = stmtInserir.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    categoria.setId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Falha ao inserir categoria, nenhum ID obtido.");
+                }
+            }
+            return categoria;
+
         } catch (SQLException e) {
             throw new Exception("Erro ao salvar categoria: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt, rs);
         }
     }
 
     @Override
     public Categoria buscarCategoriaPorNome(String nome) throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        String sql = "SELECT * FROM categorias WHERE nome = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        try {
-            conn = ConnectionFactory.getConnection();
-            String sql = "SELECT * FROM categorias WHERE nome = ?";
-            stmt = conn.prepareStatement(sql);
             stmt.setString(1, nome);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return mapearResultSetParaCategoria(rs);
-            } else {
-                return null; // Categoria não encontrada
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearResultSetParaCategoria(rs);
+                } else {
+                    return null; // Categoria não encontrada
+                }
             }
 
         } catch (SQLException e) {
-            throw new Exception("Erro ao buscar categoria por nome e tipo: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt, rs);
+            throw new Exception("Erro ao buscar categoria por nome: " + e.getMessage());
         }
     }
 
     public List<Categoria> listarCategorias() throws Exception {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         List<Categoria> categorias = new ArrayList<>();
-
-        try {
-            conn = ConnectionFactory.getConnection();
-            String sql = "SELECT * FROM categorias";
-            stmt = conn.prepareStatement(sql);
-            rs = stmt.executeQuery();
+        String sql = "SELECT * FROM categorias";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 categorias.add(mapearResultSetParaCategoria(rs));
             }
-
             return categorias;
 
         } catch (SQLException e) {
-            throw new Exception("Erro ao buscar categoria por nome e tipo: " + e.getMessage());
-        } finally {
-            ConnectionFactory.closeConnection(conn, stmt, rs);
+            throw new Exception("Erro ao listar categorias: " + e.getMessage());
         }
     }
 
