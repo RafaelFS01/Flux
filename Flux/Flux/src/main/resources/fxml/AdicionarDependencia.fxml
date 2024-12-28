@@ -33,7 +33,7 @@
                        styleClass="form-field"
                        GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-            <Label text="Dependência:" styleClass="form-label"
+            <Label text="Quantidade:" styleClass="form-label"
                    GridPane.columnIndex="0" GridPane.rowIndex="2"/>
             <TextField fx:id="quantidadeField" promptText="Digite a quantidade atrelada ao dependente"
                       styleClass="form-field"

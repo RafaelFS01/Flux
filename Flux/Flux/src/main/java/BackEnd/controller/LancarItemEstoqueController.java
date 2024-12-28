@@ -65,13 +65,28 @@ public class LancarItemEstoqueController {
         columnProduto.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getItem().getNome()));
         columnQuantidade.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQuantidade()).asObject());
 
-        // Torna a coluna de quantidade editável
+        // Torna a coluna de quantidade editável usando um TextFieldTableCell e um DoubleStringConverter
         columnQuantidade.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        columnQuantidade.setOnEditCommit(this::handleEditarQuantidade);
+        columnQuantidade.setOnEditCommit(event -> {
+            ItemLancamento itemLancamento = event.getRowValue();
+            Double novaQuantidade = event.getNewValue();
+
+            if (novaQuantidade != null && novaQuantidade > 0) {
+                itemLancamento.setQuantidade(novaQuantidade);
+
+                // Força a atualização da coluna editada
+                event.getTableView().getColumns().get(1).setVisible(false);
+                event.getTableView().getColumns().get(1).setVisible(true);
+            } else {
+                AlertHelper.showError("Erro", "A quantidade deve ser maior que zero.");
+                tableViewItens.refresh(); // Atualiza a TableView para reverter a edição
+            }
+        });
 
         configurarColunaAcoes();
 
         tableViewItens.setItems(itensLancamento);
+        tableViewItens.setEditable(true); // Torna a TableView editável
 
         // Carrega as categorias no ComboBox
         carregarCategorias();
