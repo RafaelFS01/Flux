@@ -2,26 +2,21 @@ package  BackEnd.controller;
 
 import BackEnd.model.entity.Item;
 import BackEnd.model.entity.Categoria;
+import BackEnd.model.entity.LancamentoItem;
 import BackEnd.model.service.ItemService;
 import BackEnd.model.service.CategoriaService;
 import BackEnd.model.service.DependenciaService;
 import BackEnd.util.AlertHelper;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
-import javafx.util.converter.IntegerStringConverter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +33,8 @@ public class LancarItemEstoqueController {
     @FXML
     private TextField textFieldQuantidade;
     @FXML
+    private TextField textFieldCusto;
+    @FXML
     private Button buttonAdicionar;
     @FXML
     private TableView<ItemLancamento> tableViewItens;
@@ -45,6 +42,8 @@ public class LancarItemEstoqueController {
     private TableColumn<ItemLancamento, String> columnProduto;
     @FXML
     private TableColumn<ItemLancamento, Double> columnQuantidade;
+    @FXML
+    private TableColumn<ItemLancamento, Double> columnCusto;
     @FXML
     private TableColumn<ItemLancamento, Void> columnAcoes;
     @FXML
@@ -67,14 +66,19 @@ public class LancarItemEstoqueController {
         // Configuração das colunas da TableView
         columnProduto.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getItem().getNome()));
         columnQuantidade.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQuantidade()).asObject());
+        columnCusto.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQuantidade()).asObject());
 
         // Torna a coluna de quantidade editável
         columnQuantidade.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         columnQuantidade.setOnEditCommit(this::handleEditarQuantidade);
+        columnCusto.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        columnCusto.setOnEditCommit(this::handleEditarCusto);
 
         configurarColunaAcoes();
 
         tableViewItens.setItems(itensLancamento);
+        tableViewItens.setEditable(true); // Torna a TableView editável
+
 
         // Carrega as categorias no ComboBox
         carregarCategorias();
@@ -138,6 +142,10 @@ public class LancarItemEstoqueController {
         textFieldQuantidade.textProperty().addListener((obs, oldVal, newVal) -> {
             buttonAdicionar.setDisable(comboBoxProduto.getValue() == null || newVal.trim().isEmpty() || !newVal.matches("\\d+(\\.\\d+)?"));
         });
+
+        textFieldCusto.textProperty().addListener((obs, oldVal, newVal) -> {
+            buttonAdicionar.setDisable(comboBoxProduto.getValue() == null || newVal.trim().isEmpty() || !newVal.matches("\\d+(\\.\\d+)?"));
+        });
     }
 
     @FXML
@@ -158,6 +166,7 @@ public class LancarItemEstoqueController {
         Item itemSelecionado = comboBoxProduto.getValue();
         try {
             double quantidade = Double.parseDouble(textFieldQuantidade.getText());
+            double custo = Double.parseDouble(textFieldCusto.getText());
             if (quantidade <= 0) {
                 AlertHelper.showError("Erro", "A quantidade deve ser maior que zero.");
                 return;
@@ -167,9 +176,10 @@ public class LancarItemEstoqueController {
                 return;
             }
 
-            itensLancamento.add(new ItemLancamento(itemSelecionado, quantidade));
+            itensLancamento.add(new ItemLancamento(itemSelecionado, quantidade, custo));
             comboBoxProduto.getSelectionModel().clearSelection();
             textFieldQuantidade.clear();
+            textFieldCusto.clear();
             buttonAdicionar.setDisable(true);
         } catch (NumberFormatException e) {
             AlertHelper.showError("Erro", "Por favor, insira um número válido.");
@@ -189,6 +199,21 @@ public class LancarItemEstoqueController {
         }
 
         itemLancamento.setQuantidade(novaQuantidade);
+    }
+
+    // Manipula a edição do preço de custo na TableView
+    @FXML
+    private void handleEditarCusto(TableColumn.CellEditEvent<ItemLancamento, Double> event) {
+        ItemLancamento itemLancamento = event.getRowValue();
+        double novoCusto = event.getNewValue();
+
+        if (novoCusto <= 0) {
+            AlertHelper.showError("Erro", "O preço de custo deve ser maior que zero.");
+            tableViewItens.refresh(); // Atualiza a TableView para reverter a edição
+            return;
+        }
+
+        itemLancamento.setCusto(novoCusto);
     }
 
     private void configurarColunaAcoes() {
@@ -225,11 +250,11 @@ public class LancarItemEstoqueController {
         // Confirmação do usuário
         Optional<ButtonType> result = AlertHelper.showConfirmation("Lançar Itens", "Confirmação", "Tem certeza que deseja lançar os itens no estoque?");
         if (result.isPresent() && result.get() == ButtonType.YES) {
-            // Mapa para armazenar ItemId e Quantidade
-            Map<Integer, Double> itemQuantidadeMap = new HashMap<>();
+            // Mapa para armazenar ItemId e um objeto LancamentoItem
+            Map<Integer, LancamentoItem> itemQuantidadeMap = new HashMap<>();
 
             for (ItemLancamento itemLancamento : itensLancamento) {
-                itemQuantidadeMap.put(itemLancamento.getItem().getId(), itemLancamento.getQuantidade());
+                itemQuantidadeMap.put(itemLancamento.getItem().getId(), new LancamentoItem(itemLancamento.getItem().getId(), itemLancamento.getQuantidade(), itemLancamento.getCusto()));
             }
 
             try {
@@ -258,6 +283,7 @@ public class LancarItemEstoqueController {
         comboBoxProduto.getSelectionModel().clearSelection();
         comboBoxProduto.setDisable(true);
         textFieldQuantidade.clear();
+        textFieldCusto.clear();
         itensLancamento.clear();
         buttonAdicionar.setDisable(true);
 
@@ -289,10 +315,12 @@ public class LancarItemEstoqueController {
     public static class ItemLancamento {
         private Item item;
         private double quantidade;
+        private double custo;
 
-        public ItemLancamento(Item item, double quantidade) {
+        public ItemLancamento(Item item, double quantidade, double custo) {
             this.item = item;
             this.quantidade = quantidade;
+            this.custo = custo;
         }
 
         public Item getItem() {
@@ -309,6 +337,14 @@ public class LancarItemEstoqueController {
 
         public void setQuantidade(double quantidade) {
             this.quantidade = quantidade;
+        }
+
+        public double getCusto() {
+            return custo;
+        }
+
+        public void setCusto(double custo) {
+            this.custo = custo;
         }
     }
 }

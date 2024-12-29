@@ -11,16 +11,18 @@
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding>
             <children>
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
                         <Label styleClass="form-label" text="Categoria:" />
                         <ComboBox fx:id="comboBoxCategoria" prefWidth="150.0" styleClass="form-combo" onAction="#handleCategoriaSelection" />
+                        <Label styleClass="form-label" text="Produto:" />
+                        <ComboBox fx:id="comboBoxProduto" prefWidth="150.0" styleClass="form-combo" />
                     </children>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <Label styleClass="form-label" text="Produto:" />
-                        <ComboBox fx:id="comboBoxProduto" prefWidth="150.0" styleClass="form-combo" />
+                        <Label styleClass="form-label" text="Preço de Custo:" />
+                        <TextField fx:id="textFieldCusto" styleClass="form-field" />
                         <Label styleClass="form-label" text="Quantidade:" />
                         <TextField fx:id="textFieldQuantidade" styleClass="form-field" />
                         <Button fx:id="buttonAdicionar" mnemonicParsing="false" styleClass="btn-primary" onAction="#handleAdicionarProduto" text="Adicionar Produto" />
@@ -30,6 +32,7 @@
                     <columns>
                         <TableColumn fx:id="columnProduto" prefWidth="75.0" styleClass="table-column" text="Produto" />
                         <TableColumn fx:id="columnQuantidade" prefWidth="75.0" styleClass="table-column" text="Quantidade" />
+                        <TableColumn fx:id="columnCusto" prefWidth="75.0" styleClass="table-column" text="Preço de Custo" />
                         <TableColumn fx:id="columnAcoes" prefWidth="75.0" styleClass="table-column" text="Ações" />
                     </columns>
                     <columnResizePolicy>

@@ -6,6 +6,7 @@ import BackEnd.model.dao.interfaces.CategoriaDAO;
 import BackEnd.model.dao.interfaces.ItemDAO;
 import BackEnd.model.entity.Categoria;
 import BackEnd.model.entity.Item;
+import BackEnd.model.entity.LancamentoItem;
 import BackEnd.util.ValidationHelper;
 
 import java.util.ArrayList;
@@ -29,27 +30,34 @@ public class ItemService {
 
     // Outros métodos da classe...
 
-    public List<String> lancarItensNoEstoqueComDependencias(Map<Integer, Double> itemQuantidadeMap) throws Exception {
+    public List<String> lancarItensNoEstoqueComDependencias(Map<Integer, LancamentoItem> itemQuantidadeMap) throws Exception {
         List<String> erros = new ArrayList<>();
 
         // Etapa 1: Atualizar a quantidade em estoque dos itens lançados
-        for (Map.Entry<Integer, Double> entry : itemQuantidadeMap.entrySet()) {
+        for (Map.Entry<Integer, LancamentoItem> entry : itemQuantidadeMap.entrySet()) {
             int itemId = entry.getKey();
-            Double quantidade = entry.getValue();
+            double quantidade = entry.getValue().getQuantidade();
+            //Agora você também tem o custo, se precisar dele aqui
+            double custo = entry.getValue().getCusto();
             Item item = itemDAO.buscarItemPorId(itemId);
             if (item == null) {
                 erros.add("Item com ID " + itemId + " não encontrado.");
                 continue;
             }
+            item.setPrecoCusto((item.getQuantidadeAtual() * item.getPrecoCusto() + quantidade * custo)/ (item.getQuantidadeAtual() + quantidade));
             item.setQuantidadeEstoque(item.getQuantidadeEstoque() + quantidade);
             item.setQuantidadeAtual(item.getQuantidadeAtual() + quantidade);
+
             itemDAO.atualizar(item);
         }
 
         // Etapa 2: Atualizar as dependências
-        for (Map.Entry<Integer, Double> entry : itemQuantidadeMap.entrySet()) {
+        for (Map.Entry<Integer, LancamentoItem> entry : itemQuantidadeMap.entrySet()) {
             int itemId = entry.getKey();
-            Double quantidade = entry.getValue();
+            double quantidade = entry.getValue().getQuantidade();
+            //Agora você também tem o custo, se precisar dele aqui
+            double custo = entry.getValue().getCusto();
+
             erros.addAll(dependenciaService.atualizarEstoqueItensDependentes(itemId, quantidade));
         }
 
