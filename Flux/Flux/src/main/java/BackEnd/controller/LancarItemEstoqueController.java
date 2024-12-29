@@ -9,6 +9,7 @@ import BackEnd.util.AlertHelper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -16,6 +17,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
@@ -65,35 +68,67 @@ public class LancarItemEstoqueController {
         columnProduto.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getItem().getNome()));
         columnQuantidade.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQuantidade()).asObject());
 
-        // Torna a coluna de quantidade editável usando um TextFieldTableCell e um DoubleStringConverter
+        // Torna a coluna de quantidade editável
         columnQuantidade.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        columnQuantidade.setOnEditCommit(event -> {
-            ItemLancamento itemLancamento = event.getRowValue();
-            Double novaQuantidade = event.getNewValue();
-
-            if (novaQuantidade != null && novaQuantidade > 0) {
-                itemLancamento.setQuantidade(novaQuantidade);
-
-                // Força a atualização da coluna editada
-                event.getTableView().getColumns().get(1).setVisible(false);
-                event.getTableView().getColumns().get(1).setVisible(true);
-            } else {
-                AlertHelper.showError("Erro", "A quantidade deve ser maior que zero.");
-                tableViewItens.refresh(); // Atualiza a TableView para reverter a edição
-            }
-        });
+        columnQuantidade.setOnEditCommit(this::handleEditarQuantidade);
 
         configurarColunaAcoes();
 
         tableViewItens.setItems(itensLancamento);
-        tableViewItens.setEditable(true); // Torna a TableView editável
 
         // Carrega as categorias no ComboBox
         carregarCategorias();
 
-        // Outras inicializações (se necessário)
-        comboBoxProduto.setDisable(true); // Desabilita o ComboBox de produtos inicialmente
-        buttonAdicionar.setDisable(true); // Desabilita o botão Adicionar inicialmente
+        // Inicializar o comboBoxProduto
+        comboBoxProduto.setDisable(true);
+        comboBoxProduto.setPromptText("Digite para filtrar...");
+
+        // Configurar o StringConverter para exibir o nome do item
+        comboBoxProduto.setConverter(new StringConverter<Item>() {
+            @Override
+            public String toString(Item item) {
+                return item != null ? item.getNome() : "";
+            }
+
+            @Override
+            public Item fromString(String string) {
+                return comboBoxProduto.getItems().stream()
+                        .filter(item -> item.getNome().equals(string))
+                        .findFirst()
+                        .orElse(null);
+            }
+        });
+
+        // Tornar o ComboBox editável
+        comboBoxProduto.setEditable(true); // Importante para que o usuário possa digitar
+
+        // Configurar o comportamento do ComboBox para filtragem
+        comboBoxProduto.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+            if (newText == null || newText.isEmpty()) {
+                // Se o texto for vazio, reverter para a lista completa de itens
+                if (comboBoxCategoria.getValue() != null) {
+                    carregarItensPorCategoria(comboBoxCategoria.getValue().getId());
+                }
+            } else {
+                // Filtrar os itens com base no texto digitado
+                String lowerCaseFilter = newText.toLowerCase();
+                List<Item> filteredList = comboBoxProduto.getItems().stream()
+                        .filter(item -> item.getNome().toLowerCase().contains(lowerCaseFilter))
+                        .collect(Collectors.toList());
+                comboBoxProduto.setItems(FXCollections.observableArrayList(filteredList));
+                if (!filteredList.isEmpty() && !comboBoxProduto.isShowing()) {
+                    comboBoxProduto.show(); // Mostrar o dropdown se não estiver vazio
+                }
+            }
+        });
+
+        comboBoxProduto.setOnAction(e -> {
+            Item selectedItem = comboBoxProduto.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                // Atualizar o editor com o nome do item selecionado
+                comboBoxProduto.getEditor().setText(selectedItem.getNome());
+            }
+        });
 
         // Adiciona listeners para habilitar/desabilitar botões
         comboBoxProduto.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -103,20 +138,6 @@ public class LancarItemEstoqueController {
         textFieldQuantidade.textProperty().addListener((obs, oldVal, newVal) -> {
             buttonAdicionar.setDisable(comboBoxProduto.getValue() == null || newVal.trim().isEmpty() || !newVal.matches("\\d+(\\.\\d+)?"));
         });
-
-        // Converter o Item para String no ComboBox de Produto
-        comboBoxProduto.setConverter(new StringConverter<Item>() {
-            @Override
-            public String toString(Item item) {
-                return item != null ? item.getNome() : "";
-            }
-
-            @Override
-            public Item fromString(String string) {
-                // Não é necessário para este caso, mas você pode implementar se precisar
-                return null;
-            }
-        });
     }
 
     @FXML
@@ -125,6 +146,7 @@ public class LancarItemEstoqueController {
         if (categoriaSelecionada != null) {
             carregarItensPorCategoria(categoriaSelecionada.getId());
             comboBoxProduto.setDisable(false); // Habilita o ComboBox de produtos
+            comboBoxProduto.getSelectionModel().clearSelection();
         } else {
             comboBoxProduto.getItems().clear();
             comboBoxProduto.setDisable(true); // Desabilita o ComboBox de produtos se nenhuma categoria for selecionada
@@ -256,6 +278,8 @@ public class LancarItemEstoqueController {
         try {
             List<Item> itens = itemService.listarItensPorCategoria(categoriaId);
             comboBoxProduto.setItems(FXCollections.observableArrayList(itens));
+            comboBoxProduto.getSelectionModel().clearSelection();
+            comboBoxProduto.getEditor().clear();
         } catch (Exception e) {
             AlertHelper.showError("Erro", "Não foi possível carregar os itens da categoria selecionada: " + e.getMessage());
         }

@@ -13,12 +13,16 @@ import javafx.stage.Stage;
 import BackEnd.model.entity.Categoria;
 import BackEnd.model.service.CategoriaService;
 import BackEnd.util.AlertHelper;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class AdicionarDependenciaController implements Initializable {
 
@@ -52,18 +56,18 @@ public class AdicionarDependenciaController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         try {
             configurarCategoriaComboBox();
+            configurarDependenciaComboBox();
+            configurarQuantidadeField();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            AlertHelper.showError("Erro", "Falha ao inicializar a tela: " + e.getMessage());
+            e.printStackTrace();
         }
-        configurarDependenciaComboBox();
-        configurarQuantidadeField();
     }
 
     private void configurarCategoriaComboBox() throws Exception {
         List<Categoria> categorias = categoriaService.listarCategorias();
-        categoriaComboBox.getItems().addAll(categorias);
+        categoriaComboBox.setItems(FXCollections.observableArrayList(categorias));
 
-        // Configurar o StringConverter para exibir o nome da categoria no ComboBox
         categoriaComboBox.setConverter(new StringConverter<Categoria>() {
             @Override
             public String toString(Categoria categoria) {
@@ -72,24 +76,27 @@ public class AdicionarDependenciaController implements Initializable {
 
             @Override
             public Categoria fromString(String string) {
-                return null; // Não é necessário para este caso
+                return null;
             }
         });
 
-        // Listener para carregar as dependências quando uma categoria for selecionada
         categoriaComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 try {
                     carregarDependencias(newVal.getId());
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    AlertHelper.showError("Erro", "Falha ao carregar dependências: " + e.getMessage());
+                    e.printStackTrace();
                 }
+            } else {
+                dependenciaComboBox.getItems().clear();
+                dependenciaComboBox.getEditor().clear();
             }
         });
     }
 
     private void configurarDependenciaComboBox() {
-        // Configurar o StringConverter para exibir o nome do item no ComboBox
+        // Configurar o StringConverter para exibir o nome do item
         dependenciaComboBox.setConverter(new StringConverter<Item>() {
             @Override
             public String toString(Item item) {
@@ -98,20 +105,79 @@ public class AdicionarDependenciaController implements Initializable {
 
             @Override
             public Item fromString(String string) {
-                return null; // Não é necessário para este caso
+                return dependenciaComboBox.getItems().stream()
+                        .filter(item -> item.getNome().equals(string))
+                        .findFirst()
+                        .orElse(null);
             }
         });
+
+        dependenciaComboBox.setEditable(true);
+
+        // Configurar o comportamento do ComboBox para filtragem
+        dependenciaComboBox.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+            if (newText == null || newText.isEmpty()) {
+                // Se o texto for vazio, reverter para a lista completa de itens
+                if (dependenciaComboBox.getValue() != null) {
+                    carregarDependencias(dependenciaComboBox.getValue().getId());
+                }
+            } else {
+                // Filtrar os itens com base no texto digitado
+                String lowerCaseFilter = newText.toLowerCase();
+                List<Item> filteredList = dependenciaComboBox.getItems().stream()
+                        .filter(item -> item.getNome().toLowerCase().contains(lowerCaseFilter))
+                        .collect(Collectors.toList());
+                dependenciaComboBox.setItems(FXCollections.observableArrayList(filteredList));
+                if (!filteredList.isEmpty() && !dependenciaComboBox.isShowing()) {
+                    dependenciaComboBox.show(); // Mostrar o dropdown se não estiver vazio
+                }
+            }
+        });
+
+        dependenciaComboBox.setOnAction(e -> {
+            Item selectedItem = dependenciaComboBox.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                // Atualizar o editor com o nome do item selecionado
+                dependenciaComboBox.getEditor().setText(selectedItem.getNome());
+            }
+        });
+
     }
 
-    private void carregarDependencias(int idCategoria) throws Exception {
-        List<Item> itens = itemService.listarItensPorCategoria(idCategoria);
-        dependenciaComboBox.getItems().setAll(itens);
+    private void filterItems(String filter) {
+        Categoria categoriaSelecionada = categoriaComboBox.getValue();
+        if (categoriaSelecionada == null) return;
+
+        try {
+            List<Item> itensFiltrados = itemService.listarItensPorCategoria(categoriaSelecionada.getId())
+                    .stream()
+                    .filter(item -> item.getNome().toLowerCase().contains(filter.toLowerCase()))
+                    .collect(Collectors.toList());
+
+            Platform.runLater(() -> {
+                dependenciaComboBox.setItems(FXCollections.observableArrayList(itensFiltrados));
+                dependenciaComboBox.show();
+            });
+        } catch (Exception e) {
+            AlertHelper.showError("Erro", "Não foi possível filtrar os itens: " + e.getMessage());
+        }
+    }
+
+    private void carregarDependencias(int idCategoria) {
+        try {
+            List<Item> itens = itemService.listarItensPorCategoria(idCategoria);
+            dependenciaComboBox.setItems(FXCollections.observableArrayList(itens));
+            dependenciaComboBox.getSelectionModel().clearSelection();
+            dependenciaComboBox.getEditor().clear();
+        } catch (Exception e) {
+            AlertHelper.showError("Erro", "Não foi possível carregar os itens da categoria selecionada: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void configurarQuantidadeField() {
-        // Adicionar um listener para validar a entrada do campo quantidade (opcional)
         quantidadeField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*(\\.\\d*)?")) { // Aceita números inteiros ou decimais
+            if (!newValue.matches("\\d*(\\.\\d*)?")) {
                 quantidadeField.setText(oldValue);
             }
         });
@@ -120,52 +186,43 @@ public class AdicionarDependenciaController implements Initializable {
     @FXML
     private void salvarDependencia(ActionEvent event) {
         try {
-            // Validação dos campos
             if (categoriaComboBox.getValue() == null || dependenciaComboBox.getValue() == null || quantidadeField.getText().isEmpty()) {
                 AlertHelper.showError("Erro ao salvar", "Preencha todos os campos obrigatórios.");
                 return;
             }
 
-            // Obter os valores dos campos
             Categoria categoriaSelecionada = categoriaComboBox.getValue();
             Item itemSelecionado = dependenciaComboBox.getValue();
             double quantidade = Double.parseDouble(quantidadeField.getText());
 
-            // Criar o objeto Dependencia
             Dependencia dependencia = new Dependencia();
             dependencia.setIdItemDependente(idItemDependente);
             dependencia.setIdItemNecessario(itemSelecionado.getId());
             dependencia.setIdCategoria(categoriaSelecionada.getId());
             dependencia.setQuantidade(quantidade);
 
-            // Salvar a dependência usando o serviço
             dependenciaService.salvarDependencia(dependencia);
 
-            // Executar a ação especificada pelo CadastrarItemController
             if (onDependenciaSalva != null) {
                 onDependenciaSalva.accept(itemSelecionado);
             }
 
-            // Feedback de sucesso
             AlertHelper.showSuccess("Dependência salva com sucesso!");
-
-            // Limpar os campos (opcional)
             limparCampos();
-
-            // Fechar a janela
             fecharModal(event);
 
         } catch (NumberFormatException e) {
             AlertHelper.showError("Erro ao salvar", "Quantidade inválida.");
         } catch (Exception e) {
-            AlertHelper.showError("Erro ao salvar", "Ocorreu um erro ao salvar a dependência." + e.getMessage());
+            AlertHelper.showError("Erro ao salvar", "Ocorreu um erro ao salvar a dependência: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void limparCampos() {
         categoriaComboBox.getSelectionModel().clearSelection();
-        dependenciaComboBox.getItems().clear();
+        dependenciaComboBox.getSelectionModel().clearSelection();
+        dependenciaComboBox.getEditor().clear();
         quantidadeField.clear();
     }
 
