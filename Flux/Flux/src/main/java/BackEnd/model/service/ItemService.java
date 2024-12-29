@@ -44,7 +44,7 @@ public class ItemService {
                 erros.add("Item com ID " + itemId + " não encontrado.");
                 continue;
             }
-            item.setPrecoCusto((item.getQuantidadeAtual() * item.getPrecoCusto() + quantidade * custo)/ (item.getQuantidadeAtual() + quantidade));
+            item.setPrecoCusto((item.getQuantidadeEstoque() * item.getPrecoCusto() + quantidade * custo)/ (item.getQuantidadeEstoque() + quantidade));
             item.setQuantidadeEstoque(item.getQuantidadeEstoque() + quantidade);
             item.setQuantidadeAtual(item.getQuantidadeAtual() + quantidade);
 
