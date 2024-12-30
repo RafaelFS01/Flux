@@ -72,8 +72,8 @@
 .table-view .placeholder {
     -fx-alignment: CENTER;
     -fx-font-weight: bold;
-    -fx-text-fill: #ffd700; /* Define a cor do texto do cabeçalho */
-    -fx-effect: dropshadow(three-pass-box, rgba(255, 215, 0, 1), 1, 2, 0, 0);
+    -fx-text-fill: black; /* Define a cor do texto do cabeçalho */
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 215, 0, 1), 2, 1, 0, 1);
 }
 
 .table-view .column-header {

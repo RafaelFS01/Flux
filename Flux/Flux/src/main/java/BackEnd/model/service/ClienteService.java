@@ -1,85 +1,44 @@
 package BackEnd.model.service;
 
-import BackEnd.model.dao.interfaces.ClienteDAO;
 import BackEnd.model.dao.impl.ClienteDAOImpl;
+import BackEnd.model.dao.interfaces.ClienteDAO;
+import BackEnd.model.dao.impl.GrupoDAOImpl;
+import BackEnd.model.dao.interfaces.GrupoDAO;
 import BackEnd.model.entity.Cliente;
+import BackEnd.model.entity.Grupo;
+import BackEnd.util.ValidationHelper;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public class ClienteService {
     private final ClienteDAO clienteDAO;
+    private final GrupoDAO grupoDAO;
 
     public ClienteService() {
         this.clienteDAO = new ClienteDAOImpl();
+        this.grupoDAO = new GrupoDAOImpl();
     }
 
-    public void cadastrarFuncionario(Cliente cliente) throws Exception {
-        validarFuncionario(cliente);
+    public void cadastrarCliente(Cliente cliente) throws Exception {
+        validarCliente(cliente);
 
         if (existePorId(cliente.getId())) {
-            throw new IllegalArgumentException("Já existe um funcionário com este ID.");
+            throw new IllegalArgumentException("Já existe um cliente com este ID.");
         }
 
-        if (existePorCPF(cliente.getCpf())) {
-            throw new IllegalArgumentException("Já existe um funcionário com este CPF.");
+        if (existePorCPFCNPJ(cliente.getCpfCnpj())) {
+            throw new IllegalArgumentException("Já existe um cliente com este CPF/CNPJ.");
+        }
+
+        // Verifica se o grupo informado existe, caso não seja nulo
+        if (cliente.getGrupo() != null && !grupoDAO.existePorId(cliente.getGrupo().getId())) {
+            throw new IllegalArgumentException("O grupo informado não existe.");
         }
 
         try {
             clienteDAO.criar(cliente);
         } catch (Exception e) {
-            throw new Exception("Erro ao cadastrar funcionário: " + e.getMessage());
-        }
-    }
-
-    public void criar(Cliente cliente) throws Exception {
-        validarFuncionario(cliente);
-
-        if (existePorId(cliente.getId())) {
-            throw new IllegalArgumentException("Já existe um funcionário com este ID");
-        }
-
-        try {
-            clienteDAO.criar(cliente);
-        } catch (Exception e) {
-            throw new Exception("Erro ao criar funcionário: " + e.getMessage());
-        }
-    }
-
-    public void atualizar(Cliente cliente) throws Exception {
-        validarFuncionario(cliente);
-
-        if (!existePorId(cliente.getId())) {
-            throw new IllegalArgumentException("Funcionário não encontrado");
-        }
-
-        try {
-            clienteDAO.atualizar(cliente);
-        } catch (Exception e) {
-            throw new Exception("Erro ao atualizar funcionário: " + e.getMessage());
-        }
-    }
-
-    public void excluirFuncionario(String id) throws Exception {
-        try {
-            if (clienteDAO.verificarEmprestimosAtivos(id)) {
-                throw new IllegalStateException("Não é possível excluir funcionário com empréstimos ativos");
-            }
-            clienteDAO.deletar(id);
-        } catch (Exception e) {
-            throw new Exception("Erro ao excluir funcionário: " + e.getMessage());
-        }
-    }
-
-    public Cliente buscarPorId(String id) throws Exception {
-        try {
-            Cliente cliente = clienteDAO.buscarPorId(id);
-            if (cliente == null) {
-                throw new IllegalArgumentException("Funcionário não encontrado");
-            }
-            return cliente;
-        } catch (Exception e) {
-            throw new Exception("Erro ao buscar funcionário: " + e.getMessage());
+            throw new Exception("Erro ao cadastrar cliente: " + e.getMessage());
         }
     }
 
@@ -87,7 +46,7 @@ public class ClienteService {
         try {
             return clienteDAO.listarTodos();
         } catch (Exception e) {
-            throw new Exception("Erro ao listar funcionários: " + e.getMessage());
+            throw new Exception("Erro ao listar clientes: " + e.getMessage());
         }
     }
 
@@ -95,47 +54,87 @@ public class ClienteService {
         try {
             return clienteDAO.buscarPorId(id) != null;
         } catch (Exception e) {
-            throw new Exception("Erro ao verificar existência do funcionário: " + e.getMessage());
+            throw new Exception("Erro ao verificar existência do cliente: " + e.getMessage());
         }
     }
 
-    public boolean existePorCPF(String cpf) throws Exception {
+    public boolean existePorCPFCNPJ(String cpfCnpj) throws Exception {
         try {
-            return clienteDAO.buscarPorCPF(cpf) != null;
+            return clienteDAO.buscarPorCPFCNPJ(cpfCnpj) != null;
         } catch (Exception e) {
-            throw new Exception("Erro ao verificar existência do funcionário: " + e.getMessage());
+            throw new Exception("Erro ao verificar existência do cliente por CPF/CNPJ: " + e.getMessage());
         }
     }
 
-    private void validarFuncionario(Cliente cliente) {
+    private void validarCliente(Cliente cliente) {
         if (cliente == null) {
-            throw new IllegalArgumentException("Funcionário não pode ser nulo");
+            throw new IllegalArgumentException("Cliente não pode ser nulo.");
         }
-        if (cliente.getId() == null || cliente.getId().trim().isEmpty()) {
-            throw new IllegalArgumentException("ID do funcionário é obrigatório");
+        if (ValidationHelper.isNullOrEmpty(cliente.getId())) {
+            throw new IllegalArgumentException("ID do cliente é obrigatório.");
         }
-        if (cliente.getNome() == null || cliente.getNome().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome é obrigatório");
+        if (ValidationHelper.isNullOrEmpty(cliente.getNome())) {
+            throw new IllegalArgumentException("Nome do cliente é obrigatório.");
         }
-        if (cliente.getCpf() == null || cliente.getCpf().trim().isEmpty()) {
-            throw new IllegalArgumentException("CPF é obrigatório");
+        if (cliente.getTipoCliente() == null) {
+            throw new IllegalArgumentException("Tipo de cliente é obrigatório.");
         }
-        if (cliente.getFuncao() == null || cliente.getFuncao().trim().isEmpty()) {
-            throw new IllegalArgumentException("Função é obrigatória");
+        if (ValidationHelper.isNullOrEmpty(cliente.getCpfCnpj())) {
+            throw new IllegalArgumentException("CPF/CNPJ do cliente é obrigatório.");
         }
-        if (cliente.getDataAdmissao() == null) {
-            throw new IllegalArgumentException("Data de admissão é obrigatória");
+        if (cliente.getTipoCliente() == Cliente.TipoCliente.PESSOA_FISICA && !ValidationHelper.isValidCPF(cliente.getCpfCnpj())) {
+            throw new IllegalArgumentException("CPF inválido.");
         }
-        if (cliente.getDataAdmissao().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Data de admissão não pode ser futura");
+        if (cliente.getTipoCliente() == Cliente.TipoCliente.PESSOA_JURIDICA && !ValidationHelper.isValidCNPJ(cliente.getCpfCnpj())) {
+            throw new IllegalArgumentException("CNPJ inválido.");
+        }
+        if (ValidationHelper.isNullOrEmpty(cliente.getLogradouro())) {
+            throw new IllegalArgumentException("Logradouro é obrigatório.");
+        }
+        if (ValidationHelper.isNullOrEmpty(cliente.getBairro())) {
+            throw new IllegalArgumentException("Bairro é obrigatório.");
+        }
+        if (ValidationHelper.isNullOrEmpty(cliente.getCidade())) {
+            throw new IllegalArgumentException("Cidade é obrigatória.");
+        }
+        if (ValidationHelper.isNullOrEmpty(cliente.getNumero())) {
+            throw new IllegalArgumentException("Número é obrigatório.");
+        }
+        if (ValidationHelper.isNullOrEmpty(cliente.getTelefoneCelular())) {
+            throw new IllegalArgumentException("Telefone celular é obrigatório.");
+        }
+        if (ValidationHelper.isNullOrEmpty(cliente.getEmail())) {
+            throw new IllegalArgumentException("Email é obrigatório.");
+        }
+        if (!ValidationHelper.isValidEmail(cliente.getEmail())) {
+            throw new IllegalArgumentException("Email inválido.");
         }
     }
 
-    public boolean possuiEmprestimosAtivos(String id) throws Exception {
+    // Métodos para Grupo (serão movidos para GrupoService depois)
+    public List<Grupo> listarGrupos() throws Exception {
         try {
-            return clienteDAO.verificarEmprestimosAtivos(id);
+            return grupoDAO.listarTodos();
         } catch (Exception e) {
-            throw new Exception("Erro ao verificar empréstimos ativos: " + e.getMessage());
+            throw new Exception("Erro ao listar grupos: " + e.getMessage());
         }
+    }
+
+    public void cadastrarGrupo(String nomeGrupo) throws Exception {
+        if (ValidationHelper.isNullOrEmpty(nomeGrupo)) {
+            throw new IllegalArgumentException("Nome do grupo não pode ser vazio.");
+        }
+
+        try {
+            Grupo grupo = new Grupo();
+            grupo.setNome(nomeGrupo);
+            grupoDAO.criar(grupo);
+        } catch (Exception e) {
+            throw new Exception("Erro ao cadastrar grupo: " + e.getMessage());
+        }
+    }
+
+    public void deletar(String id) throws Exception{
+        clienteDAO.deletar(id);
     }
 }

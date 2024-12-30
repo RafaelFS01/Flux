@@ -1,6 +1,7 @@
 package BackEnd.controller;
 
 import BackEnd.model.entity.Cliente;
+import BackEnd.model.service.GrupoService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -17,7 +18,6 @@ import javafx.stage.StageStyle;
 import BackEnd.model.service.ClienteService;
 import BackEnd.util.AlertHelper;
 import BackEnd.util.ConnectionFactory;
-import BackEnd.util.DateUtils;
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,15 +26,41 @@ import java.util.ResourceBundle;
 
 public class ListarClientesController implements Initializable {
 
-    @FXML private TextField pesquisaField;
-    @FXML private TableView<Cliente> tabelaFuncionarios;
-    @FXML private TableColumn<Cliente, String> colunaId;
-    @FXML private TableColumn<Cliente, String> colunaNome;
-    @FXML private TableColumn<Cliente, String> colunaCpf;
-    @FXML private TableColumn<Cliente, String> colunaFuncao;
-    @FXML private TableColumn<Cliente, String> colunaData;
-    @FXML private TableColumn<Cliente, Void> colunaAcoes;
-    @FXML private Label statusLabel;
+    @FXML
+    private TextField pesquisaField;
+    @FXML
+    private TableView<Cliente> tabelaClientes;
+    @FXML
+    private TableColumn<Cliente, String> colunaId;
+    @FXML
+    private TableColumn<Cliente, String> colunaNome;
+    @FXML
+    private TableColumn<Cliente, String> colunaCpfCnpj;
+    @FXML
+    private TableColumn<Cliente, String> colunaLogradouro;
+    @FXML
+    private TableColumn<Cliente, String> colunaBairro;
+    @FXML
+    private TableColumn<Cliente, String> colunaCidade;
+    @FXML
+    private TableColumn<Cliente, String> colunaNumero;
+    @FXML
+    private TableColumn<Cliente, String> colunaComplemento;
+    @FXML
+    private TableColumn<Cliente, String> colunaTelefone;
+    @FXML
+    private TableColumn<Cliente, String> colunaEmail;
+    @FXML
+    private TableColumn<Cliente, String> colunaComprador;
+    @FXML
+    private TableColumn<Cliente, String> colunaTipoCliente;
+    @FXML
+    private TableColumn<Cliente, String> colunaGrupo;
+
+    @FXML
+    private TableColumn<Cliente, Void> colunaAcoes;
+    @FXML
+    private Label statusLabel;
 
     private final ClienteService clienteService;
     private ObservableList<Cliente> clientes;
@@ -47,26 +73,48 @@ public class ListarClientesController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         configurarColunas();
         configurarPesquisa();
-        carregarFuncionarios();
+        carregarClientes();
     }
 
     private void configurarColunas() {
-        // Configuração das colunas da tabela
         colunaId.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleStringProperty(data.getValue().getId()));
 
         colunaNome.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleStringProperty(data.getValue().getNome()));
 
-        colunaCpf.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getCpf()));
+        colunaCpfCnpj.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getCpfCnpj()));
 
-        colunaFuncao.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getFuncao()));
+        colunaLogradouro.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getLogradouro()));
 
-        colunaData.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(
-                        DateUtils.formatarData(data.getValue().getDataAdmissao())));
+        colunaBairro.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getBairro()));
+
+        colunaCidade.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getCidade()));
+
+        colunaNumero.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getNumero()));
+
+        colunaComplemento.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getComplemento()));
+
+        colunaTelefone.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getTelefoneCelular()));
+
+        colunaEmail.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getEmail()));
+
+        colunaComprador.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getComprador()));
+
+        colunaTipoCliente.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getTipoCliente().toString()));
+
+        colunaGrupo.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getGrupo() != null ? data.getValue().getGrupo().getNome() : ""));
 
         configurarColunaAcoes();
     }
@@ -81,8 +129,8 @@ public class ListarClientesController implements Initializable {
                 btnEditar.getStyleClass().add("btn-edit");
                 btnDeletar.getStyleClass().add("btn-delete");
 
-                btnEditar.setOnAction(e -> editarFuncionario(getTableRow().getItem()));
-                btnDeletar.setOnAction(e -> deletarFuncionario(getTableRow().getItem()));
+                btnEditar.setOnAction(e -> editarCliente(getTableRow().getItem()));
+                btnDeletar.setOnAction(e -> deletarCliente(getTableRow().getItem()));
             }
 
             @Override
@@ -97,15 +145,17 @@ public class ListarClientesController implements Initializable {
         pesquisaField.textProperty().addListener((obs, old, novo) -> {
             if (clientes != null) {
                 FilteredList<Cliente> dadosFiltrados = new FilteredList<>(clientes);
-                dadosFiltrados.setPredicate(funcionario -> {
+                dadosFiltrados.setPredicate(cliente -> {
                     if (novo == null || novo.isEmpty()) {
                         return true;
                     }
                     String filtroLowerCase = novo.toLowerCase();
-                    return funcionario.getNome().toLowerCase().contains(filtroLowerCase) ||
-                            funcionario.getFuncao().toLowerCase().contains(filtroLowerCase);
+                    return cliente.getNome().toLowerCase().contains(filtroLowerCase) ||
+                            cliente.getCidade().toLowerCase().contains(filtroLowerCase) ||
+                            cliente.getBairro().toLowerCase().contains(filtroLowerCase) ||
+                            cliente.getCpfCnpj().toLowerCase().contains(filtroLowerCase);
                 });
-                tabelaFuncionarios.setItems(dadosFiltrados);
+                tabelaClientes.setItems(dadosFiltrados);
                 atualizarStatusLabel();
             }
         });
@@ -120,78 +170,76 @@ public class ListarClientesController implements Initializable {
     @FXML
     private void atualizarLista() {
         pesquisaField.clear();
-        carregarFuncionarios();
+        carregarClientes();
         ConnectionFactory.importarBancoDeDados("BACKUP.2024");
     }
 
-    private void carregarFuncionarios() {
+    private void carregarClientes() {
         try {
-            clientes = FXCollections.observableArrayList(clienteService.listarTodos());
-            tabelaFuncionarios.setItems(clientes);
+            clientes = FXCollections.observableArrayList(
+                    clienteService.listarTodos()
+            );
+            tabelaClientes.setItems(clientes);
             atualizarStatusLabel();
         } catch (Exception e) {
-            AlertHelper.showError("Erro", "Erro ao carregar funcionários: " + e.getMessage());
+            AlertHelper.showError("Erro", "Erro ao carregar clientes: " + e.getMessage());
         }
     }
 
-    private void editarFuncionario(Cliente cliente) {
+    private void editarCliente(Cliente cliente) {
         if (cliente != null) {
             try {
-                FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource("/fxml/EditarFuncionario.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/BackEnd/view/CadastrarCliente.fxml"));
                 VBox dialogContent = loader.load();
 
-                EditarFuncionarioController controller = loader.getController();
-                controller.setFuncionario(cliente);
+                CadastrarClienteController controller = loader.getController();
+                controller.carregarGrupos();
 
                 Stage dialogStage = new Stage();
+                dialogStage.setTitle("Editar Cliente");
                 dialogStage.initModality(Modality.APPLICATION_MODAL);
                 dialogStage.initStyle(StageStyle.DECORATED);
                 dialogStage.setResizable(false);
 
                 Scene scene = new Scene(dialogContent);
-                scene.getStylesheets().add(
-                        getClass().getResource("/styles/styles.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/BackEnd/styles/styles.css").toExternalForm());
 
                 dialogStage.setScene(scene);
                 dialogStage.showAndWait();
 
-                // Recarrega a lista após fechar o diálogo
-                carregarFuncionarios();
+                carregarClientes();
             } catch (IOException e) {
-                AlertHelper.showError("Erro",
-                        "Erro ao abrir formulário de edição: " + e.getMessage());
+                AlertHelper.showError("Erro", "Erro ao abrir formulário de edição: " + e.getMessage());
             }
         }
     }
 
-    private void deletarFuncionario(Cliente cliente) {
+    private void deletarCliente(Cliente cliente) {
         if (cliente != null) {
             try {
-
                 Optional<ButtonType> result = AlertHelper.showConfirmation(
                         "Confirmar Exclusão",
-                        "Deseja realmente excluir o funcionário?",
-                        String.format("Funcionário: %s%nCódigo: %s%n%n" +
+                        "Deseja realmente excluir o cliente?",
+                        String.format("Cliente: %s%nCódigo: %s%n%n" +
                                         "Esta ação não poderá ser desfeita.",
                                 cliente.getNome(), cliente.getId())
                 );
 
-                if (result.isPresent() && result.get() == ButtonType.OK) {
-                    clienteService.excluirFuncionario(cliente.getId());
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    clienteService.deletar(cliente.getId());
                     ConnectionFactory.exportarBancoDeDados("BACKUP.2024");
-                    carregarFuncionarios();
-                    AlertHelper.showSuccess("Funcionário excluído com sucesso!");
+                    carregarClientes();
+                    AlertHelper.showSuccess("Cliente excluído com sucesso!");
                 }
             } catch (Exception e) {
                 AlertHelper.showError("Erro",
-                        "Erro ao excluir funcionário: " + e.getMessage());
+                        "Erro ao excluir cliente: " + e.getMessage());
             }
         }
     }
 
     private void atualizarStatusLabel() {
-        int total = tabelaFuncionarios.getItems().size();
-        statusLabel.setText(String.format("Total de funcionários: %d", total));
+        int total = tabelaClientes.getItems().size();
+        statusLabel.setText(String.format("Total de clientes: %d", total));
     }
 }

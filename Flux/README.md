@@ -2,9 +2,6 @@
 create database Flux;
 use Flux;
 
--- Tabelas principais
-
-
 -- Tabela de Categorias
 CREATE TABLE categorias (
 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,7 +17,7 @@ descricao TEXT,
 preco_venda DECIMAL(10, 2) NOT NULL,
 preco_custo DECIMAL(10, 2) NOT NULL,
 unidade_medida VARCHAR(50) NOT NULL,
-quantidade_estoque DECIMAL(10, 5) NOT NULL,
+quantidade_estoque DECIMAL(10, 5)  NOT NULL,
 quantidade_minima DECIMAL(10, 5) NOT NULL,
 quantidade_atual DECIMAL(10, 5) NOT NULL DEFAULT 0,
 categoria_id INT,
@@ -39,13 +36,31 @@ FOREIGN KEY (id_categoria) REFERENCES categorias(id),
 CONSTRAINT check_quantidade CHECK (quantidade > 0)
 );
 
-CREATE TABLE funcionarios (
-id VARCHAR(200) PRIMARY KEY,
-nome VARCHAR(200),
-funcao VARCHAR(200),
-dt DATE,
-cpf VARCHAR(11)
-);
+CREATE TABLE `clientes` (
+`id` VARCHAR(255) NOT NULL,
+`nome` VARCHAR(255) NOT NULL,
+`cpf_cnpj` VARCHAR(14) NOT NULL,
+`logradouro` VARCHAR(255) NOT NULL,
+`bairro` VARCHAR(255) NOT NULL,
+`cidade` VARCHAR(255) NOT NULL,
+`numero` VARCHAR(20) NOT NULL,
+`complemento` VARCHAR(255) DEFAULT NULL,
+`telefone_celular` VARCHAR(20) NOT NULL,
+`email` VARCHAR(255) NOT NULL,
+`comprador` VARCHAR(255) DEFAULT NULL,
+`tipo_cliente` ENUM('PESSOA_FISICA', 'PESSOA_JURIDICA') NOT NULL,
+`id_grupo` INT DEFAULT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `uk_cpf_cnpj` (`cpf_cnpj`),
+FOREIGN KEY (`id_grupo`) REFERENCES `grupos` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `grupos` (
+`id` INT NOT NULL AUTO_INCREMENT,
+`nome` VARCHAR(255) NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `uk_nome_grupo` (`nome`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE usuarios (
 id INT PRIMARY KEY AUTO_INCREMENT,

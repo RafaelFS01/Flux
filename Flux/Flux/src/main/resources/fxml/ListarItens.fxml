@@ -2,14 +2,16 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox spacing="30" styleClass="form-container" xmlns="http://javafx.com/javafx/19"
+
+<VBox spacing="30" styleClass="form-container"
+      xmlns="http://javafx.com/javafx/19"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="BackEnd.controller.ListarItensController"
       VBox.vgrow="ALWAYS">
 
     <!-- Cabeçalho -->
     <VBox styleClass="form-header" alignment="CENTER">
-        <Label text="Itens Cadastrados" styleClass="form-title"/>
+        <Label text="Lista de Itens" styleClass="form-title"/>
         <Label text="Visualize e gerencie os itens do sistema" styleClass="form-subtitle"/>
     </VBox>
 

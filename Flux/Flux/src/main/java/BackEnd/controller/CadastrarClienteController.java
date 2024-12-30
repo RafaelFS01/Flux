@@ -1,104 +1,140 @@
 package BackEnd.controller;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.stage.Stage;
 import BackEnd.model.entity.Cliente;
+import BackEnd.model.entity.Grupo;
 import BackEnd.model.service.ClienteService;
+import BackEnd.util.AlertHelper;
 import BackEnd.util.ConnectionFactory;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
-import java.time.LocalDate;
+import java.io.IOException;
+import java.util.List;
 
 public class CadastrarClienteController {
+
     @FXML
     private TextField idField;
     @FXML
     private TextField nomeField;
     @FXML
-    private TextField cpfField;
+    private ComboBox<Cliente.TipoCliente> tipoClienteComboBox;
     @FXML
-    private TextField funcaoField;
+    private TextField cpfCnpjField;
     @FXML
-    private DatePicker dataAdmissaoField;
+    private TextField logradouroField;
+    @FXML
+    private TextField bairroField;
+    @FXML
+    private TextField cidadeField;
+    @FXML
+    private TextField numeroField;
+    @FXML
+    private TextField complementoField;
+    @FXML
+    private TextField telefoneCelularField;
+    @FXML
+    private TextField emailField;
+    @FXML
+    private TextField compradorField;
+    @FXML
+    private ComboBox<Grupo> grupoComboBox;
 
-    private final ClienteService clienteService;
-
-    public CadastrarClienteController() {
-        this.clienteService = new ClienteService();
-    }
+    private final ClienteService clienteService = new ClienteService();
 
     @FXML
     private void initialize() {
-        // Configurações iniciais
-        dataAdmissaoField.setValue(LocalDate.now());
+        tipoClienteComboBox.setItems(FXCollections.observableArrayList(Cliente.TipoCliente.values()));
+        configurarTipoClienteListener();
+        carregarGrupos();
 
-        // Configurar validações em tempo real
         idField.textProperty().addListener((obs, old, novo) -> {
             if (!novo.matches("[A-Za-z0-9-]*")) {
                 idField.setText(old);
             }
         });
 
-        cpfField.textProperty().addListener((obs, old, novo) -> {
-            if (!novo.matches("[0-9-]*")) {
-                cpfField.setText(old);
+        configurarGrupoComboBox();
+    }
+
+    private void configurarGrupoComboBox() {
+        grupoComboBox.setConverter(new StringConverter<Grupo>() {
+            @Override
+            public String toString(Grupo grupo) {
+                return (grupo == null) ? null : grupo.getNome();
             }
-            else if (novo.length() > 11) {
-                cpfField.setText(old);
+
+            @Override
+            public Grupo fromString(String string) {
+                // Não é necessário para este caso, pois o usuário não digita o nome do grupo
+                return null;
+            }
+        });
+    }
+
+    private void configurarTipoClienteListener() {
+        tipoClienteComboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, novo) -> {
+            cpfCnpjField.clear();
+            if (novo != null) {
+                if (novo == Cliente.TipoCliente.PESSOA_FISICA) {
+                    cpfCnpjField.setPromptText("Digite o CPF (11 dígitos)");
+                    cpfCnpjField.textProperty().addListener((obsCpf, oldCpf, novoCpf) -> {
+                        if (!novoCpf.matches("\\d*")) {
+                            cpfCnpjField.setText(oldCpf);
+                        } else if (novoCpf.length() > 11) {
+                            cpfCnpjField.setText(oldCpf);
+                        }
+                    });
+                } else {
+                    cpfCnpjField.setPromptText("Digite o CNPJ (14 dígitos)");
+                    cpfCnpjField.textProperty().addListener((obsCnpj, oldCnpj, novoCnpj) -> {
+                        if (!novoCnpj.matches("\\d*")) {
+                            cpfCnpjField.setText(oldCnpj);
+                        } else if (novoCnpj.length() > 14) {
+                            cpfCnpjField.setText(oldCnpj);
+                        }
+                    });
+                }
+            } else {
+                cpfCnpjField.setPromptText("Digite o CPF ou CNPJ");
             }
         });
     }
 
     @FXML
-    private void salvarFuncionario() {
+    private void salvarCliente() {
         try {
-            if (!validarCampos()) {
-                return;
-            }
-
             Cliente cliente = new Cliente();
             cliente.setId(idField.getText().trim());
             cliente.setNome(nomeField.getText().trim());
-            cliente.setCpf(cpfField.getText().trim());
-            cliente.setFuncao(funcaoField.getText().trim());
-            cliente.setDataAdmissao(dataAdmissaoField.getValue()); // Agora passa o LocalDate diretamente
+            cliente.setTipoCliente(tipoClienteComboBox.getValue());
+            cliente.setCpfCnpj(cpfCnpjField.getText().trim());
+            cliente.setLogradouro(logradouroField.getText().trim());
+            cliente.setBairro(bairroField.getText().trim());
+            cliente.setCidade(cidadeField.getText().trim());
+            cliente.setNumero(numeroField.getText().trim());
+            cliente.setComplemento(complementoField.getText().trim());
+            cliente.setTelefoneCelular(telefoneCelularField.getText().trim());
+            cliente.setEmail(emailField.getText().trim());
+            cliente.setComprador(compradorField.getText().trim());
+            cliente.setGrupo(grupoComboBox.getValue());
 
-            clienteService.cadastrarFuncionario(cliente);
+            clienteService.cadastrarCliente(cliente);
             ConnectionFactory.exportarBancoDeDados("BACKUP.2024");
-            mostrarMensagem("Sucesso", "Funcionário cadastrado com sucesso!", Alert.AlertType.INFORMATION);
+            AlertHelper.showSuccess("Cliente cadastrado com sucesso!");
             limparFormulario();
         } catch (IllegalArgumentException e) {
-            mostrarMensagem("Erro de Validação", e.getMessage(), Alert.AlertType.WARNING);
+            AlertHelper.showWarning("Erro de Validação", e.getMessage());
         } catch (Exception e) {
-            mostrarMensagem("Erro", "Erro ao cadastrar funcionário: " + e.getMessage(), Alert.AlertType.ERROR);
+            AlertHelper.showError("Erro", "Erro ao cadastrar cliente: " + e.getMessage());
         }
-    }
-
-    private boolean validarCampos() {
-        StringBuilder erros = new StringBuilder();
-        if (idField.getText().trim().isEmpty()) {
-            erros.append("- O código do funcionário é obrigatório\n");
-        }
-        if (nomeField.getText().trim().isEmpty()) {
-            erros.append("- O nome é obrigatório\n");
-        }
-        if (cpfField.getText().trim().isEmpty()) {
-            erros.append("- O cpf é obrigatório\n");
-        } else if (cpfField.getText().trim().length() < 11) {
-            erros.append("- O CPF deve ter 11 dígitos\n");
-        }
-        if (funcaoField.getText().trim().isEmpty()) {
-            erros.append("- A função é obrigatória\n");
-        }
-        if (dataAdmissaoField.getValue() == null) {
-            erros.append("- A data de admissão é obrigatória\n");
-        }
-
-        if (erros.length() > 0) {
-            mostrarMensagem("Campos Incompletos", erros.toString(), Alert.AlertType.WARNING);
-            return false;
-        }
-        return true;
     }
 
     @FXML
@@ -110,16 +146,47 @@ public class CadastrarClienteController {
     private void limparFormulario() {
         idField.clear();
         nomeField.clear();
-        cpfField.clear();
-        funcaoField.clear();
-        dataAdmissaoField.setValue(LocalDate.now());
+        tipoClienteComboBox.getSelectionModel().clearSelection();
+        cpfCnpjField.clear();
+        logradouroField.clear();
+        bairroField.clear();
+        cidadeField.clear();
+        numeroField.clear();
+        complementoField.clear();
+        telefoneCelularField.clear();
+        emailField.clear();
+        compradorField.clear();
+        grupoComboBox.getSelectionModel().clearSelection();
     }
 
-    private void mostrarMensagem(String titulo, String mensagem, Alert.AlertType tipo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensagem);
-        alert.showAndWait();
+    @FXML
+    private void abrirCadastroGrupo() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CadastrarGrupo.fxml"));
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Cadastrar Grupo");
+            stage.setScene(new Scene(loader.load()));
+
+            CadastrarGrupoController controller = loader.getController();
+            controller.setCadastroClienteController(this);
+
+            stage.showAndWait();
+        } catch (IOException e) {
+            AlertHelper.showError("Erro", "Erro ao abrir a janela de cadastro de grupo: " + e.getMessage());
+        }
+    }
+
+    public void carregarGrupos() {
+        try {
+            List<Grupo> grupos = clienteService.listarGrupos();
+            grupoComboBox.setItems(FXCollections.observableArrayList(grupos));
+        } catch (Exception e) {
+            AlertHelper.showError("Erro", "Erro ao carregar grupos: " + e.getMessage());
+        }
+    }
+
+    public void atualizarGrupos() {
+        carregarGrupos();
     }
 }
