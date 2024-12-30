@@ -11,4 +11,5 @@ public interface DependenciaDAO {
     List<Dependencia> buscarPorIdItemDependente(int idItemDependente) throws SQLException;
     void atualizar(Dependencia dependencia) throws SQLException, Exception;
     void excluir(int id) throws SQLException;
+    void excluirItem(int id) throws SQLException;
 }

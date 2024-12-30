@@ -9,8 +9,8 @@
 
     <!-- Cabeçalho -->
     <VBox styleClass="form-header" alignment="CENTER">
-        <Label text="Equipamentos Cadastrados" styleClass="form-title"/>
-        <Label text="Visualize e gerencie os items do sistema" styleClass="form-subtitle"/>
+        <Label text="Itens Cadastrados" styleClass="form-title"/>
+        <Label text="Visualize e gerencie os itens do sistema" styleClass="form-subtitle"/>
     </VBox>
 
     <!-- Barra de Ferramentas -->
@@ -28,17 +28,20 @@
     </HBox>
 
     <!-- Tabela de Equipamentos -->
-    <TableView fx:id="tabelaEquipamentos" VBox.vgrow="ALWAYS">
+    <TableView fx:id="tabelaItens" VBox.vgrow="ALWAYS">
         <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
         </columnResizePolicy>
         <columns>
             <TableColumn fx:id="colunaId" text="Código" minWidth="80" maxWidth="100"/>
-            <TableColumn fx:id="colunaDescricao" text="Descrição" minWidth="150" maxWidth="300"/>
+            <TableColumn fx:id="colunaNome" text="Nome" minWidth="150" maxWidth="300"/>
             <TableColumn fx:id="colunaQuantidadeAtual" text="Qtd. Atual" minWidth="125" maxWidth="100"/>
             <TableColumn fx:id="colunaQuantidadeEstoque" text="Qtd. Total" minWidth="125" maxWidth="100"/>
             <TableColumn fx:id="colunaQuantidadeMinima" text="Qtd. Mínima" minWidth="125" maxWidth="150"/>
-            <TableColumn fx:id="colunaTipo" text="Tipo" minWidth="100" maxWidth="100"/>
+            <TableColumn fx:id="colunaVenda" text="P. Venda" minWidth="100" maxWidth="100"/>
+            <TableColumn fx:id="colunaCusto" text="P. Custo" minWidth="100" maxWidth="100"/>
+            <TableColumn fx:id="colunaMedida" text="Und. Medida" minWidth="125" maxWidth="150"/>
+            <TableColumn fx:id="colunaCategoria" text="Categoria" minWidth="100" maxWidth="100"/>
             <TableColumn fx:id="colunaStatus" text="Status" minWidth="100" maxWidth="100"/>
             <TableColumn fx:id="colunaAcoes" text="Ações" minWidth="220" maxWidth="300"/>
         </columns>

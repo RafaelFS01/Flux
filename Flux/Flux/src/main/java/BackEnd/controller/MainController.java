@@ -59,7 +59,7 @@ public class MainController {
 
     @FXML
     private void mostrarListaEquipamentos() {
-        carregarFXML("/fxml/ListarEquipamentos.fxml");
+        carregarFXML("/fxml/ListarItens.fxml");
     }
 
     @FXML

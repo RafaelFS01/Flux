@@ -63,6 +63,13 @@ public class DependenciaService {
         dependenciaDAO.excluir(id);
     }
 
+    public void excluirItem(int id) throws Exception {
+        if (id <= 0) {
+            throw new Exception("ID inválido: ID deve ser maior que zero para exclusão.");
+        }
+        dependenciaDAO.excluirItem(id);
+    }
+
     public List<String> atualizarEstoqueItensDependentes(int itemId, Double quantidadeAdicionada) throws Exception {
         List<String> erros = new ArrayList<>();
         List<Dependencia> dependencias = dependenciaDAO.buscarPorIdItemDependente(itemId);

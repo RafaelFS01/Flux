@@ -98,6 +98,18 @@ public class DependenciaDAOImpl implements DependenciaDAO {
         }
     }
 
+    @Override
+    public void excluirItem(int id) throws SQLException {
+        String sql = "DELETE FROM Dependencias WHERE id_item_necessario = ?";
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+
+        }
+    }
+
     private Dependencia mapearResultSetParaDependencia(ResultSet rs) throws SQLException {
         Dependencia dependencia = new Dependencia();
         dependencia.setId(rs.getInt("id"));

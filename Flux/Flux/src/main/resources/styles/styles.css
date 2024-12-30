@@ -60,7 +60,7 @@
 
 /* Estilos das Tabelas */
 .table-view {
-    -fx-background-color: rgba(4, 180, 148, 0.2);
+    -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-table-cell-border-color: #f6f6f6;
     -fx-background-radius: 15px 15px 0px 0px;
 }
@@ -72,7 +72,8 @@
 .table-view .placeholder {
     -fx-alignment: CENTER;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(three-pass-box, rgba(4, 180, 148, 1), 3, 0.65, 0, 1);
+    -fx-text-fill: #ffd700; /* Define a cor do texto do cabeçalho */
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 215, 0, 1), 1, 2, 0, 0);
 }
 
 .table-view .column-header {
@@ -89,7 +90,7 @@
 }
 
 .table-view .column-header-background .label {
-    -fx-text-fill: rgba(4, 180, 148, 1); /* Define a cor do texto do cabeçalho */
+    -fx-text-fill: #ffd700; /* Define a cor do texto do cabeçalho */
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 1), 3, 0.6, 0, 1);
 }
 
@@ -98,12 +99,13 @@
     -fx-alignment: CENTER;
 }
 
-.table-row-cell:odd {
-    -fx-background-color: #f8f9fa;
+.table-row-cell:even {
+    -fx-background-color: #ff4242;
 }
 
-.table-row-cell:even {
-    -fx-background-color: rgba(4, 180, 148, 0.1);
+.table-row-cell:odd {
+    -fx-background-color: #cc0202;
+    -fx-text-fill: white;
 }
 
 .table-row-cell:hover {
@@ -117,13 +119,13 @@
 
 /* Estilo para a pista da barra de rolagem */
 .table-view .scroll-bar:horizontal .track {
-    -fx-background-color: rgba(0, 179, 147, 0.2); /* Cor do "trilho" da barra de rolagem */
+    -fx-background-color: rgba(255, 215, 0, 0.2); /* Cor do "trilho" da barra de rolagem */
     -fx-padding: 5px;
 }
 
 /* Estilo para o botão de rolagem (thumb) */
 .table-view .scroll-bar:horizontal .thumb {
-    -fx-background-color: #00B393; /* Cor do botão de rolagem */
+    -fx-background-color: #ffd700; /* Cor do botão de rolagem */
     -fx-background-radius: 5px;
     -fx-padding: 5px;
 }
@@ -131,7 +133,7 @@
 /* Estilo para os botões de incremento e decremento */
 .table-view .scroll-bar:horizontal .increment-button,
 .table-view .scroll-bar:horizontal .decrement-button {
-    -fx-background-color: transparent; /* Cor dos botões de incremento e decremento */
+    -fx-background-color: #ffd700; /* Cor dos botões de incremento e decremento */
 }
 
 /* Estilo para a barra de rolagem vertical do TableView */
@@ -141,13 +143,13 @@
 
 /* Estilo para a pista da barra de rolagem */
 .table-view .scroll-bar:vertical .track {
-    -fx-background-color: rgba(0, 179, 147, 0.2); /* Cor do "trilho" da barra de rolagem */
+    -fx-background-color: rgba(255, 215, 0, 0.2); /* Cor do "trilho" da barra de rolagem */
     -fx-padding: 5px;
 }
 
 /* Estilo para o botão de rolagem (thumb) */
 .table-view .scroll-bar:vertical .thumb {
-    -fx-background-color: #00B393; /* Cor do botão de rolagem */
+    -fx-background-color: #ffd700; /* Cor do botão de rolagem */
     -fx-background-radius: 5px;
     -fx-padding: 5px;
 }
@@ -155,7 +157,7 @@
 /* Estilo para os botões de incremento e decremento */
 .table-view .scroll-bar:vertical .increment-button,
 .table-view .scroll-bar:vertical .decrement-button {
-    -fx-background-color: transparent; /* Cor dos botões de incremento e decremento */
+    -fx-background-color: #ffd700; /* Cor dos botões de incremento e decremento */
 }
 
 /* Estilização específica da tabela de avarias */
@@ -384,23 +386,6 @@ tela-principal{
         -fx-text-fill: #2c3e50;
     }
 
-    /* Botões */
-    .btn-primary {
-        -fx-font-family: 'Segoe UI';
-        -fx-font-size: 14px;
-        -fx-background-color: #1a237e;
-        -fx-text-fill: white;
-        -fx-padding: 10px 20px;
-        -fx-cursor: hand;
-        -fx-font-weight: bold;
-    }
-
-    .btn-primary:hover {
-        -fx-background-color: #283593;
-        -fx-translate-y: -5px;
-        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2); /* Aumenta a sombra ao passar o mouse */
-    }
-
     .btn-secondary {
         -fx-font-family: 'Segoe UI';
         -fx-font-size: 14px;
@@ -581,8 +566,8 @@ tela-principal{
     .btn-primary {
         -fx-font-family: 'Segoe UI';
         -fx-font-size: 14px;
-        -fx-background-color: #009177;
-        -fx-text-fill: white;
+        -fx-background-color: #ffd700;
+        -fx-text-fill: black;
         -fx-padding: 10px 20px;
         -fx-cursor: hand;
         -fx-font-weight: bold;
@@ -590,7 +575,10 @@ tela-principal{
     }
 
     .btn-primary:hover {
-        -fx-background-color: #166b5c;
+        -fx-background-color: #c4a700;
+        -fx-text-fill: white;
+        -fx-translate-y: -2px;
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2); /* Aumenta a sombra ao passar o mouse */
     }
 
     .btn-secondary {
@@ -606,6 +594,9 @@ tela-principal{
 
     .btn-secondary:hover {
         -fx-background-color: #bdbdbd;
+        -fx-text-fill: white;
+        -fx-translate-y: -2px;
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2); /* Aumenta a sombra ao passar o mouse */
     }
 
     /* Estilização do ComboBox */
@@ -646,12 +637,6 @@ tela-principal{
     .form-container .scroll-pane .scroll-bar:vertical .thumb {
         -fx-background-color: #90a4ae;
         -fx-background-radius: 4px;
-    }
-    /* Estilos para a lista de funcionários */
-    .toolbar-container {
-        -fx-background-color: rgba(0, 179, 147, 0.4);
-        -fx-background-radius: 5px;
-        -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.9), 3, 0.6, 0, 1);
     }
 
     .search-field {
@@ -850,7 +835,7 @@ tela-principal{
     }
 
     .toolbar-container {
-        -fx-background-color: rgba(0, 179, 147, 0.65);
+        -fx-background-color: rgba(255, 215, 0, 0.80);
         -fx-background-radius: 5px;
         -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 3, 0.6, 0, 5);
     }
