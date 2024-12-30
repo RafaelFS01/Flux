@@ -1,7 +1,10 @@
 -- TABELAS DO MYSQL
 create database Flux;
 use Flux;
-
+DROP TABLE grupos;
+SELECT * FROM clientes;
+DELETE FROM clientes WHERE id = '1';
+-- Tabelas principais
 -- Tabela de Categorias
 CREATE TABLE categorias (
 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -24,7 +27,7 @@ categoria_id INT,
 FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
 
-CREATE TABLE Dependencias (
+CREATE TABLE dependencias (
 id INT PRIMARY KEY AUTO_INCREMENT,
 id_item_dependente INT NOT NULL,
 id_item_necessario INT NOT NULL,
@@ -36,31 +39,30 @@ FOREIGN KEY (id_categoria) REFERENCES categorias(id),
 CONSTRAINT check_quantidade CHECK (quantidade > 0)
 );
 
-CREATE TABLE `clientes` (
-`id` VARCHAR(255) NOT NULL,
-`nome` VARCHAR(255) NOT NULL,
-`cpf_cnpj` VARCHAR(14) NOT NULL,
-`logradouro` VARCHAR(255) NOT NULL,
-`bairro` VARCHAR(255) NOT NULL,
-`cidade` VARCHAR(255) NOT NULL,
-`numero` VARCHAR(20) NOT NULL,
-`complemento` VARCHAR(255) DEFAULT NULL,
-`telefone_celular` VARCHAR(20) NOT NULL,
-`email` VARCHAR(255) NOT NULL,
-`comprador` VARCHAR(255) DEFAULT NULL,
-`tipo_cliente` ENUM('PESSOA_FISICA', 'PESSOA_JURIDICA') NOT NULL,
-`id_grupo` INT DEFAULT NULL,
-PRIMARY KEY (`id`),
-UNIQUE KEY `uk_cpf_cnpj` (`cpf_cnpj`),
-FOREIGN KEY (`id_grupo`) REFERENCES `grupos` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE grupos (
+id INT NOT NULL AUTO_INCREMENT,
+nome VARCHAR(255) NOT NULL,
+PRIMARY KEY (id),
+UNIQUE KEY uk_nome_grupo (nome)
+);
 
-CREATE TABLE `grupos` (
-`id` INT NOT NULL AUTO_INCREMENT,
-`nome` VARCHAR(255) NOT NULL,
-PRIMARY KEY (`id`),
-UNIQUE KEY `uk_nome_grupo` (`nome`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE clientes (
+id VARCHAR(255) PRIMARY KEY NOT NULL,
+nome VARCHAR(255) NOT NULL,
+cpf_cnpj VARCHAR(14) NOT NULL,
+logradouro VARCHAR(255) NOT NULL,
+bairro VARCHAR(255) NOT NULL,
+cidade VARCHAR(255) NOT NULL,
+numero VARCHAR(20) NOT NULL,
+complemento VARCHAR(255) DEFAULT NULL,
+telefone_celular VARCHAR(20) NOT NULL,
+email VARCHAR(255) NOT NULL,
+comprador VARCHAR(255) DEFAULT NULL,
+tipo_cliente ENUM('PESSOA_FISICA', 'PESSOA_JURIDICA') NOT NULL,
+id_grupo INT DEFAULT NULL,
+UNIQUE KEY uk_cpf_cnpj (cpf_cnpj),
+FOREIGN KEY (id_grupo) REFERENCES grupos (id)
+);
 
 CREATE TABLE usuarios (
 id INT PRIMARY KEY AUTO_INCREMENT,
