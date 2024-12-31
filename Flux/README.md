@@ -1,9 +1,7 @@
 -- TABELAS DO MYSQL
 create database Flux;
 use Flux;
-DROP TABLE grupos;
-SELECT * FROM clientes;
-DELETE FROM clientes WHERE id = '1';
+
 -- Tabelas principais
 -- Tabela de Categorias
 CREATE TABLE categorias (

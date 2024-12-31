@@ -97,6 +97,8 @@
 .table-view .table-cell {
     -fx-padding: 10px;
     -fx-alignment: CENTER;
+    -fx-text-fill: #ffd700;
+    -fx-font-weight: bold;
 }
 
 .table-row-cell:even {
@@ -109,7 +111,7 @@
 }
 
 .table-row-cell:hover {
-    -fx-background-color: #e3f2fd;
+    -fx-background-color: #919191;
 }
 
 /* Estilo para a barra de rolagem horizontal do TableView */
@@ -733,7 +735,7 @@ tela-principal{
 
     /* Estilos da tabela */
     .table-row-cell:hover {
-        -fx-background-color: #e3f2fd;
+        -fx-background-color: #919191;
     }
 
     .table-row-cell:selected {

@@ -32,6 +32,10 @@
                     </Label>
                 </VBox>
 
+                <Label fx:id="labelPedidos" styleClass="menu-section" text="PEDIDOS" />
+                <Button fx:id="btnRegistrarPedido" onAction="#mostrarRegistrarPedido" styleClass="menu-button"
+                        text="📦 Registrar Pedido" />
+
                 <!-- Menu Items -->
                 <Label fx:id="labelEquipamentos" styleClass="menu-section" text="EQUIPAMENTOS" />
                 <Button fx:id="btnRegistrarEquip" onAction="#mostrarRegistroEquipamento" styleClass="menu-button"
