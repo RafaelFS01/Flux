@@ -3,14 +3,15 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="30" styleClass="form-container" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="BackEnd.controller.RegistrarPedidoController">
+<?import java.net.URL?>
+<VBox spacing="5" styleClass="form-container" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="BackEnd.controller.RegistrarPedidoController" >
 
     <VBox styleClass="form-header" alignment="CENTER">
         <Label text="Registro de Pedido" styleClass="form-title"/>
         <Label text="Preencha os dados do pedido" styleClass="form-subtitle"/>
     </VBox>
 
-    <GridPane hgap="20" vgap="20">
+    <GridPane hgap="20" vgap="5">
         <Label text="Cliente:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
         <ComboBox fx:id="cbCliente" promptText="Selecione o Cliente" styleClass="form-combo" GridPane.columnIndex="1" GridPane.rowIndex="0" HBox.hgrow="ALWAYS" />
 
@@ -21,7 +22,7 @@
         <DatePicker fx:id="dpDataPedido" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="2" HBox.hgrow="ALWAYS" />
 
         <Label text="Observações:" styleClass="form-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-        <TextArea fx:id="txtObservacoes" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="3" HBox.hgrow="ALWAYS" />
+        <TextArea fx:id="txtObservacoes" styleClass="form-field" GridPane.columnIndex="1" GridPane.rowIndex="3" HBox.hgrow="ALWAYS" maxHeight="10"/>
 
         <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" />
@@ -31,7 +32,7 @@
 
     <Button fx:id="btnAdicionarProdutos" text="Adicionar Produtos" onAction="#abrirJanelaAdicionarProdutos" styleClass="btn-primary" HBox.hgrow="ALWAYS" />
 
-    <TableView fx:id="tvItensPedido" VBox.vgrow="ALWAYS" minHeight="200">
+    <TableView fx:id="tvItensPedido" VBox.vgrow="ALWAYS" minHeight="200" maxHeight="200">
         <columns>
             <TableColumn fx:id="colunaId" text="ID" minWidth="50" maxWidth="70"/>
             <TableColumn fx:id="colunaNome" text="Produto" minWidth="150" />
@@ -61,4 +62,9 @@
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
+
+    <!-- Estilos CSS específicos -->
+    <stylesheets>
+        <URL value="@../styles/styles.css"/>
+    </stylesheets>
 </VBox>

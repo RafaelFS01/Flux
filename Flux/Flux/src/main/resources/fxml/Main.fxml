@@ -35,6 +35,8 @@
                 <Label fx:id="labelPedidos" styleClass="menu-section" text="PEDIDOS" />
                 <Button fx:id="btnRegistrarPedido" onAction="#mostrarRegistrarPedido" styleClass="menu-button"
                         text="📦 Registrar Pedido" />
+                <Button fx:id="btnListarPedidos" onAction="#mostrarListarPedidos" styleClass="menu-button"
+                        text="📦 Listar Pedidos" />
 
                 <!-- Menu Items -->
                 <Label fx:id="labelEquipamentos" styleClass="menu-section" text="EQUIPAMENTOS" />

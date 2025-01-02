@@ -467,7 +467,7 @@ tela-principal{
 
     .form-header {
         -fx-spacing: 5px;
-        -fx-padding: 0 0 20px 0;
+        -fx-padding: 0 0 0 0;
     }
 
     .form-title {

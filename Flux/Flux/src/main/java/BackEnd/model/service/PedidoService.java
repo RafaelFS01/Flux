@@ -59,8 +59,48 @@ public class PedidoService {
     }
 
     public void cancelarPedido(int id) throws Exception {
-        // Implementar lógica de cancelamento (por exemplo, alterar o status do pedido)
-        // A atualização do status deve ser feita no DAO correspondente.
+        Pedido pedido = pedidoDAO.buscarPorId(id);
+        if (pedido == null){
+            throw new Exception("Pedido com a ID: " + id + " não foi encontrado");
+        }
+        if (pedido.getStatus() == StatusPedido.CANCELADO) {
+            throw new Exception("Pedido já está cancelado.");
+        }
+        if (pedido.getStatus() == StatusPedido.CONCLUIDO) {
+            throw new Exception("Não é possível cancelar um pedido já concluído.");
+        }
+
+        pedidoDAO.atualizarStatus(id, StatusPedido.CANCELADO, null);
+    }
+
+    public void atualizarTipoVenda(int pedidoId, TipoVenda tipoVenda) throws Exception {
+        Pedido pedido = pedidoDAO.buscarPorId(pedidoId);
+        if (pedido == null) {
+            throw new Exception("Pedido não encontrado.");
+        }
+        if (pedido.getStatus() == StatusPedido.CANCELADO) {
+            throw new Exception("Não é possível alterar o tipo de venda de um pedido cancelado.");
+        }
+
+        if (tipoVenda == TipoVenda.VENDA_NORMAL || tipoVenda == TipoVenda.NOTA_FISCAL) {
+            if (pedido.getTipoVenda() == TipoVenda.PEDIDO) {
+                for (ItemPedido itemPedido : pedido.getItens()) {
+                    Item item = itemDAO.buscarItemPorId(itemPedido.getItem().getId());
+                    if (item != null) {
+                        if (item.getQuantidadeEstoque() >= itemPedido.getQuantidade()) {
+                            item.setQuantidadeEstoque(item.getQuantidadeEstoque() - itemPedido.getQuantidade());
+                        } else {
+                            throw new Exception("Estoque insuficiente para o item: " + item.getNome());
+                        }
+                        itemDAO.atualizar(item);
+                    }
+                }
+            }
+        }
+        pedidoDAO.atualizarTipoVenda(pedidoId, tipoVenda);
+        if (tipoVenda == TipoVenda.VENDA_NORMAL || tipoVenda == TipoVenda.NOTA_FISCAL) {
+            pedidoDAO.atualizarStatus(pedidoId, StatusPedido.CONCLUIDO, null);
+        }
     }
 
     public void validarPedido(Pedido pedido) throws Exception {
@@ -91,5 +131,36 @@ public class PedidoService {
         return itensPedido.stream()
                 .mapToDouble(itemPedido -> itemPedido.getQuantidade() * itemPedido.getPrecoVenda())
                 .sum();
+    }
+
+    public void atualizarPedido(Pedido pedido) throws Exception {
+        validarPedido(pedido);
+        pedidoDAO.atualizarPedido(pedido);
+    }
+
+    public void atualizarItens(Pedido pedido) throws Exception {
+        // 1. Excluir os itens antigos do pedido
+        List<ItemPedido> itensAntigos = itemPedidoDAO.buscarPorIdPedido(pedido.getId());
+        for (ItemPedido itemAntigo : itensAntigos) {
+            itemPedidoDAO.excluir(itemAntigo.getId()); // Você precisará criar este método em ItemPedidoDAO
+        }
+
+        // 2. Salvar os novos itens do pedido e atualizar itens
+        for (ItemPedido itemPedido : pedido.getItens()) {
+            itemPedido.setPedido(pedido);
+            itemPedidoDAO.salvar(itemPedido);
+
+            Item item = itemDAO.buscarItemPorId(itemPedido.getItem().getId());
+            if (item != null) {
+                // Atualiza as quantidades com base no tipo de venda (se necessário)
+                if (pedido.getTipoVenda() == TipoVenda.NOTA_FISCAL || pedido.getTipoVenda() == TipoVenda.VENDA_NORMAL) {
+                    item.setQuantidadeEstoque(item.getQuantidadeEstoque() - itemPedido.getQuantidade());
+                }
+                if (pedido.getTipoVenda() == TipoVenda.NOTA_FISCAL || pedido.getTipoVenda() == TipoVenda.VENDA_NORMAL || pedido.getTipoVenda() == TipoVenda.PEDIDO) {
+                    item.setQuantidadeAtual(item.getQuantidadeAtual() - itemPedido.getQuantidade());
+                }
+                itemDAO.atualizar(item);
+            }
+        }
     }
 }

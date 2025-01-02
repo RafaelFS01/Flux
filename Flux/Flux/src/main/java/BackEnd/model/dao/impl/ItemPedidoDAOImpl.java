@@ -66,4 +66,16 @@ public class ItemPedidoDAOImpl implements ItemPedidoDAO {
         }
         return itensPedido;
     }
+
+    @Override
+    public void excluir(int id) throws Exception {
+        String sql = "DELETE FROM itens_pedido WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new Exception("Erro ao excluir item do pedido: " + e.getMessage(), e);
+        }
+    }
 }

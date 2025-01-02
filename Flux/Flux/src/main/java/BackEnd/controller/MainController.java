@@ -53,6 +53,11 @@ public class MainController {
     }
 
     @FXML
+    private void mostrarListarPedidos() {
+        carregarFXML("/fxml/ListarPedidos.fxml");
+    }
+
+    @FXML
     private void mostrarRegistroEquipamento() {
         carregarFXML("/fxml/CadastrarItem.fxml");
     }

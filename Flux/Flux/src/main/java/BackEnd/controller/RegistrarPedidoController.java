@@ -55,6 +55,9 @@ public class RegistrarPedidoController {
     private ObservableList<Cliente> clientes;
     private ObservableList<ItemPedido> itensPedido = FXCollections.observableArrayList();
 
+    // Atributo para armazenar o pedido sendo editado
+    private Pedido pedidoSendoEditado;
+
     public RegistrarPedidoController() {
         this.pedidoService = new PedidoService();
         this.clienteService = new ClienteService();
@@ -235,24 +238,46 @@ public class RegistrarPedidoController {
                 }
             }
 
-            Pedido pedido = new Pedido();
-            pedido.setCliente(cbCliente.getValue());
-            pedido.setTipoVenda(cbTipoVenda.getValue());
-            pedido.setDataPedido(dpDataPedido.getValue());
-            pedido.setObservacoes(txtObservacoes.getText());
-            pedido.setItens(itensPedido.stream().collect(Collectors.toList()));
-            pedido.setValorTotal(itensPedido.stream().mapToDouble(ip -> ip.getQuantidade() * ip.getPrecoVenda()).sum());
+            // Se pedidoSendoEditado não for nulo, atualiza o pedido existente
+            if (pedidoSendoEditado != null) {
+                pedidoSendoEditado.setCliente(cbCliente.getValue());
+                pedidoSendoEditado.setTipoVenda(cbTipoVenda.getValue());
+                pedidoSendoEditado.setDataPedido(dpDataPedido.getValue());
+                pedidoSendoEditado.setObservacoes(txtObservacoes.getText());
+                pedidoSendoEditado.setItens(itensPedido.stream().collect(Collectors.toList()));
+                pedidoSendoEditado.setValorTotal(itensPedido.stream().mapToDouble(ip -> ip.getQuantidade() * ip.getPrecoVenda()).sum());
+                if (cbTipoVenda.getValue() == TipoVenda.PEDIDO) {
+                    pedidoSendoEditado.setStatus(StatusPedido.EM_ANDAMENTO);
+                } else {
+                    pedidoSendoEditado.setStatus(StatusPedido.CONCLUIDO);
+                }
 
-            if (cbTipoVenda.getValue() == TipoVenda.PEDIDO) {
-                pedido.setStatus(StatusPedido.EM_ANDAMENTO);
+                pedidoService.atualizarPedido(pedidoSendoEditado);
+                pedidoService.atualizarItens(pedidoSendoEditado);
+
+                AlertHelper.showSuccess("Pedido atualizado com sucesso!");
             } else {
-                pedido.setStatus(StatusPedido.CONCLUIDO);
+                // Caso contrário, cria um novo pedido
+                Pedido pedido = new Pedido();
+                pedido.setCliente(cbCliente.getValue());
+                pedido.setTipoVenda(cbTipoVenda.getValue());
+                pedido.setDataPedido(dpDataPedido.getValue());
+                pedido.setObservacoes(txtObservacoes.getText());
+                pedido.setItens(itensPedido.stream().collect(Collectors.toList()));
+                pedido.setValorTotal(itensPedido.stream().mapToDouble(ip -> ip.getQuantidade() * ip.getPrecoVenda()).sum());
+
+                if (cbTipoVenda.getValue() == TipoVenda.PEDIDO) {
+                    pedido.setStatus(StatusPedido.EM_ANDAMENTO);
+                } else {
+                    pedido.setStatus(StatusPedido.CONCLUIDO);
+                }
+
+                pedidoService.salvarPedido(pedido);
+                pedidoService.salvarItens(pedido);
+
+                AlertHelper.showSuccess("Pedido salvo com sucesso!");
             }
 
-            pedidoService.salvarPedido(pedido);
-            pedidoService.salvarItens(pedido);
-
-            AlertHelper.showSuccess("Pedido salvo com sucesso!");
             limparCampos();
 
         } catch (Exception e) {
@@ -271,6 +296,25 @@ public class RegistrarPedidoController {
         dpDataPedido.setValue(LocalDate.now());
         txtObservacoes.clear();
         itensPedido.clear();
+        atualizarTotais();
+        // Reseta o pedido sendo editado
+        pedidoSendoEditado = null;
+    }
+
+    // Método para preencher os dados do pedido na tela quando for editar
+    public void preencherDadosPedido(Pedido pedido) {
+        pedidoSendoEditado = pedido;
+        // Preenche os campos com os dados do pedido
+        cbCliente.setValue(pedido.getCliente());
+        cbTipoVenda.setValue(pedido.getTipoVenda());
+        dpDataPedido.setValue(pedido.getDataPedido());
+        txtObservacoes.setText(pedido.getObservacoes());
+
+        // Limpa a lista atual de itens do pedido e adiciona os itens do pedido recebido
+        itensPedido.clear();
+        itensPedido.addAll(pedido.getItens());
+
+        // Atualiza os totais
         atualizarTotais();
     }
 }

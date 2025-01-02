@@ -29,7 +29,7 @@ public class PedidoDAOImpl implements PedidoDAO {
     public void salvar(Pedido pedido) throws Exception {
         String sql = "INSERT INTO pedidos (cliente_id, tipo_venda, data_pedido, valor_total, status, observacoes) VALUES (?, ?, ?, ?, ?, ?)";
         Connection conn = null;
-        int maxRetries = 1;
+        int maxRetries = 5;
         int retryDelay = 1000; // Milissegundos
 
         for (int retryCount = 0; retryCount < maxRetries; retryCount++) {
@@ -57,6 +57,7 @@ public class PedidoDAOImpl implements PedidoDAO {
 
                 conn.commit(); // Commita a transação
                 ConnectionFactory.exportarBancoDeDados("BACKUP.2024");
+                return; // Sai do loop se a operação for bem-sucedida
             } catch (Exception e) {
                 if (conn != null) {
                     try {
@@ -151,12 +152,62 @@ public class PedidoDAOImpl implements PedidoDAO {
     @Override
     public void atualizarStatus(int id, StatusPedido status, Connection conn) throws Exception {
         String sql = "UPDATE pedidos SET status = ? WHERE id = ?";
+        boolean localConnection = false;
+
+        if (conn == null) {
+            conn = ConnectionFactory.getConnection();
+            localConnection = true;
+        }
+
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, status.name());
             stmt.setInt(2, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new Exception("Erro ao atualizar status do pedido: " + e.getMessage(), e);
+        } finally {
+            if (localConnection) {
+                // Fecha a conexão apenas se foi aberta localmente
+                try {
+                    if (conn != null) {
+                        conn.close();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    AlertHelper.showError("Erro ao fechar conexão", e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void atualizarTipoVenda(int pedidoId, TipoVenda tipoVenda) throws Exception {
+        String sql = "UPDATE pedidos SET tipo_venda = ? WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, tipoVenda.name());
+            stmt.setInt(2, pedidoId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new Exception("Erro ao atualizar tipo de venda do pedido: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void atualizarPedido(Pedido pedido) throws Exception {
+        String sql = "UPDATE pedidos SET cliente_id = ?, tipo_venda = ?, data_pedido = ?, valor_total = ?, status = ?, observacoes = ? WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, pedido.getCliente().getId());
+            stmt.setString(2, pedido.getTipoVenda().name());
+            stmt.setDate(3, java.sql.Date.valueOf(pedido.getDataPedido()));
+            stmt.setDouble(4, pedido.getValorTotal());
+            stmt.setString(5, pedido.getStatus().name());
+            stmt.setString(6, pedido.getObservacoes());
+            stmt.setInt(7, pedido.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new Exception("Erro ao atualizar pedido: " + e.getMessage(), e);
         }
     }
 }
