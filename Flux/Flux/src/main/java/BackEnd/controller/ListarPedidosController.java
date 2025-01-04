@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -45,6 +46,11 @@ public class ListarPedidosController {
     private ObservableList<Pedido> pedidos;
     private ObservableList<Pedido> pedidosSelecionados = FXCollections.observableArrayList();
     private FilteredList<Pedido> filteredData;
+    private MainController mainController;
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     public ListarPedidosController() {
         this.pedidoService = new PedidoService();
@@ -294,6 +300,18 @@ public class ListarPedidosController {
             return;
         }
 
-        AlertHelper.showInfo("Visualizar Pedidos", "Funcionalidade de visualização de pedidos será implementada em breve.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/VisualizarPedidos.fxml"));
+            Parent root = loader.load();
+
+            VisualizarPedidosController visualizarPedidosController = loader.getController();
+            visualizarPedidosController.setPedidos(pedidosSelecionados);
+
+            mainController.setAreaPrincipal(root); // Chama o método no MainController para atualizar a área principal
+
+        } catch (IOException e) {
+            AlertHelper.showError("Erro ao carregar a tela de Visualização de Pedidos", e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

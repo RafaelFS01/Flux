@@ -44,6 +44,27 @@ PRIMARY KEY (id),
 UNIQUE KEY uk_nome_grupo (nome)
 );
 
+CREATE TABLE pedidos (
+id INT AUTO_INCREMENT PRIMARY KEY,
+cliente_id VARCHAR(255) NOT NULL, -- Assumindo que o ID do cliente é uma string (CPF/CNPJ)
+tipo_venda ENUM('NOTA_FISCAL', 'VENDA_NORMAL', 'PEDIDO') NOT NULL,
+data_pedido DATE NOT NULL,
+valor_total DECIMAL(10, 2) NOT NULL, -- DECIMAL para armazenar valores monetários com precisão
+status ENUM('CONCLUIDO', 'EM_ANDAMENTO', 'CANCELADO') NOT NULL,
+observacoes TEXT,
+FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE -- Se um cliente for deletado, seus pedidos também serão
+);
+
+CREATE TABLE itens_pedido (
+id INT AUTO_INCREMENT PRIMARY KEY,
+pedido_id INT NOT NULL,
+item_id INT NOT NULL,
+quantidade DECIMAL(10, 2) NOT NULL, -- Alterado para DECIMAL para maior precisão
+preco_venda DECIMAL(10, 2) NOT NULL, -- DECIMAL para valores monetários
+FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE, -- Se um pedido for deletado, seus itens também serão
+FOREIGN KEY (item_id) REFERENCES itens(id) -- Mantém a integridade referencial, mas você pode ajustar o comportamento ON DELETE conforme necessário
+);
+
 CREATE TABLE clientes (
 id VARCHAR(255) PRIMARY KEY NOT NULL,
 nome VARCHAR(255) NOT NULL,

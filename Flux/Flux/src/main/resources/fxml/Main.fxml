@@ -63,7 +63,7 @@
     </left>
 
     <center>
-        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background-color: #f4f4f4;">
+        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background-color: #f4f4f4;" styleClass="area-principal">
             <VBox fx:id="areaPrincipal" alignment="CENTER" spacing="20" style="-fx-background-color: white;
                   -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);">
                 <VBox alignment="CENTER" spacing="15">
