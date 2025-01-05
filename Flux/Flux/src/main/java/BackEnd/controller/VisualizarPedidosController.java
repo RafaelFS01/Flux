@@ -1,8 +1,13 @@
 package BackEnd.controller;
 
+import BackEnd.model.entity.Categoria;
+import BackEnd.model.entity.Dependencia;
 import BackEnd.model.entity.Item;
 import BackEnd.model.entity.ItemPedido;
 import BackEnd.model.entity.Pedido;
+import BackEnd.model.service.CategoriaService;
+import BackEnd.model.service.DependenciaService;
+import BackEnd.model.service.ItemService;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,48 +15,63 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class VisualizarPedidosController {
 
-    @FXML
-    private TableView<ItemResumo> tabelaResumo;
-    @FXML
-    private TableColumn<ItemResumo, Integer> colunaResumoId;
-    @FXML
-    private TableColumn<ItemResumo, String> colunaResumoNome;
-    @FXML
-    private TableColumn<ItemResumo, Double> colunaResumoPrecoVenda;
-    @FXML
-    private TableColumn<ItemResumo, String> colunaResumoUnidadeMedida;
-    @FXML
-    private TableColumn<ItemResumo, Double> colunaResumoQuantidade;
-    @FXML
-    private TableColumn<ItemResumo, Double> colunaResumoQtdAtual;
-    @FXML
-    private TableColumn<ItemResumo, Double> colunaResumoQtdEstoque;
-    @FXML
-    private TableColumn<ItemResumo, String> colunaResumoCategoria;
-    @FXML
-    private Label labelValorTotal;
-    @FXML
-    private Label labelQuantidadeTotal;
-    @FXML
-    private VBox containerTabelasIndividuais;
+    @FXML private TableView<ItemResumo> tabelaResumo;
+    @FXML private TableColumn<ItemResumo, Integer> colunaResumoId;
+    @FXML private TableColumn<ItemResumo, String> colunaResumoNome;
+    @FXML private TableColumn<ItemResumo, Double> colunaResumoPrecoVenda;
+    @FXML private TableColumn<ItemResumo, String> colunaResumoUnidadeMedida;
+    @FXML private TableColumn<ItemResumo, Double> colunaResumoQuantidade;
+    @FXML private TableColumn<ItemResumo, Double> colunaResumoQtdAtual;
+    @FXML private TableColumn<ItemResumo, Double> colunaResumoQtdEstoque;
+    @FXML private TableColumn<ItemResumo, String> colunaResumoCategoria;
+    @FXML private Label labelValorTotal;
+    @FXML private Label labelQuantidadeTotal;
+    @FXML private VBox containerTabelasIndividuais;
+    @FXML private ComboBox<String> cbFiltroCategoria;
+    @FXML private TableView<DependenciaResumo> tabelaDependencias;
+    @FXML private TableColumn<DependenciaResumo, Integer> colunaDependenciaId;
+    @FXML private TableColumn<DependenciaResumo, String> colunaDependenciaNome;
+    @FXML private TableColumn<DependenciaResumo, String> colunaDependenteNome;
+    @FXML private TableColumn<DependenciaResumo, Double> colunaQtdDependente;
+    @FXML private TableColumn<DependenciaResumo, Double> colunaQtdDependencia;
+    @FXML private TableColumn<DependenciaResumo, String> colunaDependenciaUnidadeMedida;
+    @FXML private TableColumn<DependenciaResumo, String> colunaDependenciaCategoria;
 
     private ObservableList<Pedido> pedidosSelecionados;
     private ObservableList<ItemResumo> itensResumo = FXCollections.observableArrayList();
+    private ObservableList<DependenciaResumo> dependenciasResumo = FXCollections.observableArrayList();
+
+    private ItemService itemService;
+    private DependenciaService dependenciaService;
+    private CategoriaService categoriaService;
 
     public void initialize() {
+        itemService = new ItemService();
+        dependenciaService = new DependenciaService();
+        categoriaService = new CategoriaService();
         configurarColunasTabelaResumo();
+        configurarColunasTabelaDependencias();
+        carregarCategorias();
+        cbFiltroCategoria.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                atualizarTabelaDependencias();
+            }
+        });
     }
 
     public void setPedidos(List<Pedido> pedidos) {
@@ -60,6 +80,8 @@ public class VisualizarPedidosController {
         criarTabelasPedidosIndividuais();
         preencherTabelasPedidosIndividuais();
         calcularTotais();
+        cbFiltroCategoria.setValue("Todas as Categorias");
+        atualizarTabelaDependencias();
     }
 
     private void configurarColunasTabelaResumo() {
@@ -73,6 +95,67 @@ public class VisualizarPedidosController {
         colunaResumoCategoria.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCategoria()));
     }
 
+    private void configurarColunasTabelaDependencias() {
+        colunaDependenciaId.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        colunaDependenciaNome.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNomeDependencia()));
+        colunaQtdDependente.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQtdDependente()).asObject());
+        colunaQtdDependencia.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQtdDependencia()).asObject());
+        colunaDependenciaUnidadeMedida.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUnidadeMedida()));
+        colunaDependenciaCategoria.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCategoria()));
+    }
+
+    private void carregarCategorias() {
+        try {
+            List<Categoria> categorias = categoriaService.listarCategorias();
+            List<String> nomesCategorias = categorias.stream()
+                    .map(Categoria::getNome)
+                    .collect(Collectors.toList());
+            nomesCategorias.add(0, "Todas as Categorias");
+            cbFiltroCategoria.setItems(FXCollections.observableArrayList(nomesCategorias));
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Tratar a exceção (e.g., mostrar mensagem de erro)
+        }
+    }
+
+    private void atualizarTabelaDependencias() {
+        dependenciasResumo.clear();
+        String categoriaSelecionada = cbFiltroCategoria.getValue();
+        dependenciasResumo.addAll(calcularDependenciasNecessarias(categoriaSelecionada));
+        tabelaDependencias.setItems(dependenciasResumo);
+    }
+
+    private List<DependenciaResumo> calcularDependenciasNecessarias(String categoria) {
+        Map<Integer, DependenciaResumo> dependenciasMap = new HashMap<>();
+
+        for (Pedido pedido : pedidosSelecionados) {
+            for (ItemPedido itemPedido : pedido.getItens()) {
+                Item item = itemPedido.getItem(); // Este é o item dependente
+                try {
+                    List<Dependencia> dependencias = dependenciaService.buscarPorIdItemDependente(item.getId());
+                    for (Dependencia dependencia : dependencias) {
+                        Item itemDependente = itemService.buscarItemPorId(dependencia.getIdItemDependente());
+                        Item itemNecessario = itemService.buscarItemPorId(dependencia.getIdItemNecessario());
+
+                        // Verifica se a categoria do item NECESSÁRIO corresponde à categoria selecionada
+                        if (categoria.equals("Todas as Categorias") || itemNecessario.getCategoria().getNome().equals(categoria)) {
+                            DependenciaResumo depResumo = dependenciasMap.computeIfAbsent(dependencia.getId(),
+                                    id -> new DependenciaResumo(dependencia, itemDependente, itemNecessario));
+
+                            depResumo.setQtdDependente(depResumo.getQtdDependente() + itemPedido.getQuantidade());
+                            depResumo.setQtdDependencia(depResumo.getQtdDependencia() + itemPedido.getQuantidade() * dependencia.getQuantidade());
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // Tratar a exceção
+                }
+            }
+        }
+
+        return new ArrayList<>(dependenciasMap.values());
+    }
+
     private void preencherTabelaResumo() {
         Map<Integer, ItemResumo> itensAgrupados = new HashMap<>();
 
@@ -81,10 +164,10 @@ public class VisualizarPedidosController {
                 int idItem = itemPedido.getItem().getId();
                 if (itensAgrupados.containsKey(idItem)) {
                     ItemResumo itemResumo = itensAgrupados.get(idItem);
-                    itemResumo.setQuantidade(itemResumo.getQuantidade() + itemPedido.getQuantidade()); // Usando Double
+                    itemResumo.setQuantidade(itemResumo.getQuantidade() + itemPedido.getQuantidade());
                 } else {
                     ItemResumo itemResumo = new ItemResumo(itemPedido.getItem());
-                    itemResumo.setQuantidade(itemPedido.getQuantidade()); // Usando Double
+                    itemResumo.setQuantidade(itemPedido.getQuantidade());
                     itensAgrupados.put(idItem, itemResumo);
                 }
             }
@@ -104,14 +187,11 @@ public class VisualizarPedidosController {
 
             tabelaPedido.setItems(FXCollections.observableArrayList(pedido.getItens()));
 
-            // Cria um HBox para os labels de totais do pedido
-            HBox hboxTotaisPedido = new HBox(10); // Espaçamento de 10 entre os labels
+            HBox hboxTotaisPedido = new HBox(10);
             hboxTotaisPedido.setAlignment(Pos.CENTER_RIGHT);
 
-            // Calcula os totais do pedido
             Map<String, Double> totaisPedido = calcularTotaisPedido(pedido);
 
-            // Cria os labels e adiciona ao HBox
             Label labelValorTotalPedido = new Label("Valor Total: R$ " + String.format("%.2f", totaisPedido.get("valorTotal")));
             Label labelQuantidadeTotalPedido = new Label("Quantidade Total: " + String.format("%.2f", totaisPedido.get("quantidadeTotal")));
             labelValorTotalPedido.getStyleClass().add("form-label");
@@ -119,8 +199,7 @@ public class VisualizarPedidosController {
 
             hboxTotaisPedido.getChildren().addAll(labelValorTotalPedido, labelQuantidadeTotalPedido);
 
-            // Adiciona o label do cliente, a tabela e o HBox de totais ao VBox
-            VBox vboxPedido = new VBox(5); // Espaçamento de 5 entre os elementos
+            VBox vboxPedido = new VBox(5);
             vboxPedido.getChildren().addAll(labelCliente, tabelaPedido, hboxTotaisPedido);
 
             containerTabelasIndividuais.getChildren().add(vboxPedido);
@@ -157,18 +236,17 @@ public class VisualizarPedidosController {
     }
 
     private void preencherTabelasPedidosIndividuais() {
-        // Não é necessário fazer nada aqui, pois as tabelas já são preenchidas em criarTabelasPedidosIndividuais()
+        // Já preenchidas em criarTabelasPedidosIndividuais()
     }
 
     private void calcularTotais() {
         double valorTotal = pedidosSelecionados.stream().mapToDouble(Pedido::getValorTotal).sum();
-        double quantidadeTotal = itensResumo.stream().mapToDouble(ItemResumo::getQuantidade).sum(); // Usando Double
+        double quantidadeTotal = itensResumo.stream().mapToDouble(ItemResumo::getQuantidade).sum();
 
         labelValorTotal.setText("Valor Total: R$ " + String.format("%.2f", valorTotal));
-        labelQuantidadeTotal.setText("Quantidade Total: " + String.format("%.2f", quantidadeTotal)); // Formatando para 2 casas decimais
+        labelQuantidadeTotal.setText("Quantidade Total: " + String.format("%.2f", quantidadeTotal));
     }
 
-    // Método para calcular os totais de um pedido específico
     private Map<String, Double> calcularTotaisPedido(Pedido pedido) {
         double valorTotal = pedido.getItens().stream()
                 .mapToDouble(itemPedido -> itemPedido.getQuantidade() * itemPedido.getPrecoVenda())
@@ -184,15 +262,14 @@ public class VisualizarPedidosController {
         return totais;
     }
 
-    // Classe Interna para o Resumo
     public static class ItemResumo {
         private int id;
         private String nome;
         private double precoVenda;
         private String unidadeMedida;
-        private double quantidade; // Alterado para Double
-        private double qtdAtual; // Alterado para Double
-        private double qtdEstoque; // Alterado para Double
+        private double quantidade;
+        private double qtdAtual;
+        private double qtdEstoque;
         private String categoria;
 
         public ItemResumo(Item item) {
@@ -260,6 +337,74 @@ public class VisualizarPedidosController {
 
         public void setQtdEstoque(double qtdEstoque) {
             this.qtdEstoque = qtdEstoque;
+        }
+
+        public String getCategoria() {
+            return categoria;
+        }
+
+        public void setCategoria(String categoria) {
+            this.categoria = categoria;
+        }
+    }
+
+    public static class DependenciaResumo {
+        private int id;
+        private String nomeDependencia;
+        private double qtdDependente;
+        private double qtdDependencia;
+        private String unidadeMedida;
+        private String categoria;
+
+        public DependenciaResumo(Dependencia dependencia, Item itemDependente, Item itemNecessario) {
+            this.id = dependencia.getId();
+            this.nomeDependencia = itemNecessario.getNome();
+            this.qtdDependente = 0;
+            this.qtdDependencia = 0;
+            this.unidadeMedida = itemNecessario.getUnidadeMedida();
+            this.categoria = itemNecessario.getCategoria().getNome(); // Categoria do item NECESSÁRIO (Dependência)
+        }
+
+        // Getters e Setters
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getNomeDependencia() {
+            return nomeDependencia;
+        }
+
+        public void setNomeDependencia(String nomeDependencia) {
+            this.nomeDependencia = nomeDependencia;
+        }
+
+        public double getQtdDependente() {
+            return qtdDependente;
+        }
+
+        public void setQtdDependente(double qtdDependente) {
+            this.qtdDependente = qtdDependente;
+        }
+
+        public double getQtdDependencia() {
+            return qtdDependencia;
+        }
+
+        public void setQtdDependencia(double qtdDependencia) {
+            this.qtdDependencia = qtdDependencia;
+        }
+
+        public String getUnidadeMedida() {
+            return unidadeMedida;
+        }
+
+        public void setUnidadeMedida(String unidadeMedida) {
+            this.unidadeMedida = unidadeMedida;
         }
 
         public String getCategoria() {
