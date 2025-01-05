@@ -230,12 +230,6 @@ public class RegistrarPedidoController {
                         return;
                     }
                 }
-                if (cbTipoVenda.getValue() == TipoVenda.NOTA_FISCAL || cbTipoVenda.getValue() == TipoVenda.VENDA_NORMAL || cbTipoVenda.getValue() == TipoVenda.PEDIDO) {
-                    if (itemPedido.getQuantidade() > itemPedido.getItem().getQuantidadeAtual()) {
-                        AlertHelper.showError("Quantidade atual insuficiente", "Não há quantidade atual suficiente para o item: " + itemPedido.getItem().getNome());
-                        return;
-                    }
-                }
             }
 
             // Se pedidoSendoEditado não for nulo, atualiza o pedido existente

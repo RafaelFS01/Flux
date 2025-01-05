@@ -51,10 +51,17 @@ public class VisualizarPedidosController {
     @FXML private TableColumn<DependenciaResumo, Double> colunaQtdDependencia;
     @FXML private TableColumn<DependenciaResumo, String> colunaDependenciaUnidadeMedida;
     @FXML private TableColumn<DependenciaResumo, String> colunaDependenciaCategoria;
+    @FXML private TableView<ItemFaltanteResumo> tabelaResumoFaltantes;
+    @FXML private TableColumn<ItemFaltanteResumo, Integer> colunaFaltantesId;
+    @FXML private TableColumn<ItemFaltanteResumo, String> colunaFaltantesNome;
+    @FXML private TableColumn<ItemFaltanteResumo, Double> colunaFaltantesQuantidade;
+    @FXML private TableColumn<ItemFaltanteResumo, String> colunaFaltantesUnidadeMedida;
+    @FXML private TableColumn<ItemFaltanteResumo, String> colunaFaltantesCategoria;
 
     private ObservableList<Pedido> pedidosSelecionados;
     private ObservableList<ItemResumo> itensResumo = FXCollections.observableArrayList();
     private ObservableList<DependenciaResumo> dependenciasResumo = FXCollections.observableArrayList();
+    private ObservableList<ItemFaltanteResumo> itensFaltantesResumo = FXCollections.observableArrayList();
 
     private ItemService itemService;
     private DependenciaService dependenciaService;
@@ -66,6 +73,7 @@ public class VisualizarPedidosController {
         categoriaService = new CategoriaService();
         configurarColunasTabelaResumo();
         configurarColunasTabelaDependencias();
+        configurarColunasTabelaResumoFaltantes();
         carregarCategorias();
         cbFiltroCategoria.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
@@ -77,6 +85,7 @@ public class VisualizarPedidosController {
     public void setPedidos(List<Pedido> pedidos) {
         this.pedidosSelecionados = FXCollections.observableArrayList(pedidos);
         preencherTabelaResumo();
+        preencherTabelaResumoFaltantes();
         criarTabelasPedidosIndividuais();
         preencherTabelasPedidosIndividuais();
         calcularTotais();
@@ -98,10 +107,19 @@ public class VisualizarPedidosController {
     private void configurarColunasTabelaDependencias() {
         colunaDependenciaId.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
         colunaDependenciaNome.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNomeDependencia()));
+        colunaDependenteNome.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNomeDependente()));
         colunaQtdDependente.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQtdDependente()).asObject());
         colunaQtdDependencia.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQtdDependencia()).asObject());
         colunaDependenciaUnidadeMedida.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUnidadeMedida()));
         colunaDependenciaCategoria.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCategoria()));
+    }
+
+    private void configurarColunasTabelaResumoFaltantes() {
+        colunaFaltantesId.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        colunaFaltantesNome.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNome()));
+        colunaFaltantesQuantidade.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getQuantidade()).asObject());
+        colunaFaltantesUnidadeMedida.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUnidadeMedida()));
+        colunaFaltantesCategoria.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCategoria()));
     }
 
     private void carregarCategorias() {
@@ -128,28 +146,27 @@ public class VisualizarPedidosController {
     private List<DependenciaResumo> calcularDependenciasNecessarias(String categoria) {
         Map<Integer, DependenciaResumo> dependenciasMap = new HashMap<>();
 
-        for (Pedido pedido : pedidosSelecionados) {
-            for (ItemPedido itemPedido : pedido.getItens()) {
-                Item item = itemPedido.getItem(); // Este é o item dependente
-                try {
-                    List<Dependencia> dependencias = dependenciaService.buscarPorIdItemDependente(item.getId());
-                    for (Dependencia dependencia : dependencias) {
-                        Item itemDependente = itemService.buscarItemPorId(dependencia.getIdItemDependente());
-                        Item itemNecessario = itemService.buscarItemPorId(dependencia.getIdItemNecessario());
+        // Usar os itens da tabela de resumo de faltantes
+        for (ItemFaltanteResumo itemFaltante : itensFaltantesResumo) {
+            try {
+                List<Dependencia> dependencias = dependenciaService.buscarPorIdItemDependente(itemFaltante.getId());
+                for (Dependencia dependencia : dependencias) {
+                    Item itemDependente = itemService.buscarItemPorId(dependencia.getIdItemDependente());
+                    Item itemNecessario = itemService.buscarItemPorId(dependencia.getIdItemNecessario());
 
-                        // Verifica se a categoria do item NECESSÁRIO corresponde à categoria selecionada
-                        if (categoria.equals("Todas as Categorias") || itemNecessario.getCategoria().getNome().equals(categoria)) {
-                            DependenciaResumo depResumo = dependenciasMap.computeIfAbsent(dependencia.getId(),
-                                    id -> new DependenciaResumo(dependencia, itemDependente, itemNecessario));
+                    // Verifica se a categoria do item NECESSÁRIO corresponde à categoria selecionada
+                    if (categoria.equals("Todas as Categorias") || itemNecessario.getCategoria().getNome().equals(categoria)) {
+                        DependenciaResumo depResumo = dependenciasMap.computeIfAbsent(dependencia.getId(),
+                                id -> new DependenciaResumo(dependencia, itemDependente, itemNecessario));
 
-                            depResumo.setQtdDependente(depResumo.getQtdDependente() + itemPedido.getQuantidade());
-                            depResumo.setQtdDependencia(depResumo.getQtdDependencia() + itemPedido.getQuantidade() * dependencia.getQuantidade());
-                        }
+                        // Usar a quantidade da tabela de resumo de faltantes
+                        depResumo.setQtdDependente(itemFaltante.getQuantidade());
+                        depResumo.setQtdDependencia(itemFaltante.getQuantidade() * dependencia.getQuantidade());
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    // Tratar a exceção
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Tratar a exceção
             }
         }
 
@@ -175,6 +192,38 @@ public class VisualizarPedidosController {
 
         itensResumo.addAll(itensAgrupados.values());
         tabelaResumo.setItems(itensResumo);
+    }
+
+    private void preencherTabelaResumoFaltantes() {
+        itensFaltantesResumo.clear();
+        itensFaltantesResumo.addAll(calcularItensFaltantes());
+        tabelaResumoFaltantes.setItems(itensFaltantesResumo);
+    }
+
+    private List<ItemFaltanteResumo> calcularItensFaltantes() {
+        Map<Integer, ItemResumo> itensAgrupados = new HashMap<>();
+
+        for (Pedido pedido : pedidosSelecionados) {
+            for (ItemPedido itemPedido : pedido.getItens()) {
+                Item item = itemPedido.getItem();
+                int idItem = item.getId();
+
+                if (itensAgrupados.containsKey(idItem)) {
+                    ItemResumo itemResumo = itensAgrupados.get(idItem);
+                    itemResumo.calcularQuantidade(itemPedido.getQuantidade());
+                } else {
+                    ItemResumo itemResumo = new ItemResumo(item);
+                    itemResumo.calcularQuantidade(itemPedido.getQuantidade());
+                    itensAgrupados.put(idItem, itemResumo);
+                }
+            }
+        }
+
+        // Filtrar itens onde a quantidade (soma das quantidades dos pedidos) é maior que a quantidade em estoque
+        return itensAgrupados.values().stream()
+                .filter(itemResumo -> itemResumo.getQuantidade() > itemResumo.getQtdEstoque())
+                .map(ItemFaltanteResumo::new)
+                .collect(Collectors.toList());
     }
 
     private void criarTabelasPedidosIndividuais() {
@@ -280,6 +329,7 @@ public class VisualizarPedidosController {
             this.qtdAtual = item.getQuantidadeAtual();
             this.qtdEstoque = item.getQuantidadeEstoque();
             this.categoria = item.getCategoria().getNome();
+            this.quantidade = 0;
         }
 
         // Getters e Setters
@@ -322,6 +372,9 @@ public class VisualizarPedidosController {
         public void setQuantidade(double quantidade) {
             this.quantidade = quantidade;
         }
+        public void calcularQuantidade(double quantidade) {
+            this.quantidade += quantidade;
+        }
 
         public double getQtdAtual() {
             return qtdAtual;
@@ -351,6 +404,7 @@ public class VisualizarPedidosController {
     public static class DependenciaResumo {
         private int id;
         private String nomeDependencia;
+        private String nomeDependente;
         private double qtdDependente;
         private double qtdDependencia;
         private String unidadeMedida;
@@ -359,10 +413,11 @@ public class VisualizarPedidosController {
         public DependenciaResumo(Dependencia dependencia, Item itemDependente, Item itemNecessario) {
             this.id = dependencia.getId();
             this.nomeDependencia = itemNecessario.getNome();
+            this.nomeDependente = itemDependente.getNome();
             this.qtdDependente = 0;
             this.qtdDependencia = 0;
             this.unidadeMedida = itemNecessario.getUnidadeMedida();
-            this.categoria = itemNecessario.getCategoria().getNome(); // Categoria do item NECESSÁRIO (Dependência)
+            this.categoria = itemNecessario.getCategoria().getNome();
         }
 
         // Getters e Setters
@@ -383,6 +438,14 @@ public class VisualizarPedidosController {
             this.nomeDependencia = nomeDependencia;
         }
 
+        public String getNomeDependente() {
+            return nomeDependente;
+        }
+
+        public void setNomeDependente(String nomeDependente) {
+            this.nomeDependente = nomeDependente;
+        }
+
         public double getQtdDependente() {
             return qtdDependente;
         }
@@ -397,6 +460,65 @@ public class VisualizarPedidosController {
 
         public void setQtdDependencia(double qtdDependencia) {
             this.qtdDependencia = qtdDependencia;
+        }
+
+        public String getUnidadeMedida() {
+            return unidadeMedida;
+        }
+
+        public void setUnidadeMedida(String unidadeMedida) {
+            this.unidadeMedida = unidadeMedida;
+        }
+
+        public String getCategoria() {
+            return categoria;
+        }
+
+        public void setCategoria(String categoria) {
+            this.categoria = categoria;
+        }
+    }
+
+    public static class ItemFaltanteResumo {
+        private int id;
+        private String nome;
+        private double quantidade; // Agora representa a diferença
+        private String unidadeMedida;
+        private String categoria;
+
+        public ItemFaltanteResumo(ItemResumo itemResumo) {
+            this.id = itemResumo.getId();
+            this.nome = itemResumo.getNome();
+            // Calcula a diferença (absoluta) entre a quantidade e a quantidade em estoque
+            this.quantidade = Math.abs(itemResumo.getQuantidade() - itemResumo.getQtdEstoque());
+            this.unidadeMedida = itemResumo.getUnidadeMedida();
+            this.categoria = itemResumo.getCategoria();
+        }
+
+        // Getters e Setters
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getNome() {
+            return nome;
+        }
+
+        public void setNome(String nome) {
+            this.nome = nome;
+        }
+
+        public double getQuantidade() {
+            return quantidade;
+        }
+
+        public void setQuantidade(double quantidade) {
+            this.quantidade = quantidade;
         }
 
         public String getUnidadeMedida() {

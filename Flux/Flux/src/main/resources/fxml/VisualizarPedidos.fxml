@@ -28,6 +28,7 @@
             <columns>
                 <TableColumn fx:id="colunaDependenciaId" text="ID" prefWidth="50.0" />
                 <TableColumn fx:id="colunaDependenciaNome" text="Dependência" prefWidth="150.0" />
+                <TableColumn fx:id="colunaDependenteNome" text="Dependente" prefWidth="150.0" />
                 <TableColumn fx:id="colunaQtdDependente" text="Qtd. Dependente" prefWidth="100.0" />
                 <TableColumn fx:id="colunaQtdDependencia" text="Qtd. Dependência" prefWidth="100.0" />
                 <TableColumn fx:id="colunaDependenciaUnidadeMedida" text="Und. de Medida" prefWidth="100.0" />
@@ -35,6 +36,24 @@
             </columns>
             <placeholder>
                 <Label text="Nenhuma dependência encontrada." />
+            </placeholder>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+
+        <!-- Tabela de Resumo de Faltantes -->
+        <Label text="Resumo de Faltantes:" style="-fx-font-size: 26px" styleClass="form-label" />
+        <TableView fx:id="tabelaResumoFaltantes" prefHeight="200.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colunaFaltantesId" text="ID" prefWidth="75.0" />
+                <TableColumn fx:id="colunaFaltantesNome" text="Nome" prefWidth="150.0" />
+                <TableColumn fx:id="colunaFaltantesQuantidade" text="Quantidade" prefWidth="75.0" />
+                <TableColumn fx:id="colunaFaltantesUnidadeMedida" text="Unid. de Medida" prefWidth="100.0" />
+                <TableColumn fx:id="colunaFaltantesCategoria" text="Categoria" prefWidth="100.0" />
+            </columns>
+            <placeholder>
+                <Label text="Nenhum item faltante encontrado." />
             </placeholder>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
