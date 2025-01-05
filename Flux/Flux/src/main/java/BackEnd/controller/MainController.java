@@ -92,6 +92,11 @@ public class MainController {
     }
 
     @FXML
+    private void mostrarListaCompras() {
+        carregarFXML("/fxml/ListarCompras.fxml");
+    }
+
+    @FXML
     private void mostrarCadastroFuncionario() {
         carregarFXML("/fxml/CadastrarCliente.fxml");
     }

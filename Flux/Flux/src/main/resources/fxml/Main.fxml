@@ -39,13 +39,15 @@
                         text="📦 Listar Pedidos" />
 
                 <!-- Menu Items -->
-                <Label fx:id="labelEquipamentos" styleClass="menu-section" text="EQUIPAMENTOS" />
+                <Label fx:id="labelEquipamentos" styleClass="menu-section" text="Itens" />
                 <Button fx:id="btnRegistrarEquip" onAction="#mostrarRegistroEquipamento" styleClass="menu-button"
-                        text="📦 Registrar Equipamento" />
+                        text="📦 Cadastrar Item" />
                 <Button fx:id="btnLancarItem" onAction="#mostrarLancarItem" styleClass="menu-button"
                         text="📦 Lançar Item" />
                 <Button fx:id="btnListarEquip" onAction="#mostrarListaEquipamentos" styleClass="menu-button"
-                        text="📋 Listar Equipamentos" />
+                        text="📋 Listar Itens" />
+                <Button onAction="#mostrarListaCompras" styleClass="menu-button"
+                        text="📋 Listar Compras" />
 
 
                 <Label fx:id="labelFuncionarios" styleClass="menu-section" text="FUNCIONÁRIOS" />
